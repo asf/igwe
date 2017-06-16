@@ -1,0 +1,27 @@
+{
+
+  "manifest_version": 2,
+  "name": "IGDownload",
+  "version": "1.0",
+  "default_locale": "en",
+  "description": "Allows you to download IG fotos.",
+
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "downloads",
+    "notifications"
+],
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["igcs.js"]
+    }
+  ]
+
+}
