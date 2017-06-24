@@ -25,7 +25,13 @@ function onFailed(error) {
 function handleChanged(delta) {
   if (delta.state && delta.state.current === "complete") {
     console.log(`Download ${delta.id} has completed.`);
-    notify(delta.id);
+    var search_dl = browser.downloads.search({"id": delta.id});
+    search_dl.then(function(downloads) {
+      for (download of downloads) {
+        console.log(download.url);
+        if (download.url.indexOf('cdninstagram.com') > 0) { notify(download.url); }
+      }
+    });
   }
 }
 
