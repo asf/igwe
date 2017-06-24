@@ -46,11 +46,16 @@ function download(message) {
 
   // Set up post file for download
   var a = document.createElement('a');
-  var file = new Blob([message.post], {type: 'text/plain', charset: 'utf-8'});
+  var obj = new Object();
+  obj.post = message.post;
+  obj.timestamp = message.timestamp;
+  obj.location = message.location;
+  obj.bio = message.bio;
+  var file = new Blob([JSON.stringify(obj)], {type: 'text/json', charset: 'utf-8'});
   a.href = URL.createObjectURL(file);
   a.download = "ig_downloads/" +
                message.user + "/" +
-               parser.filename.substring(0, parser.filename.lastIndexOf('.')) + ".txt";
+               parser.filename.substring(0, parser.filename.lastIndexOf('.')) + ".json";
 
   console.log(`filename.txt: ${a.download}`);
   var d_post = browser.downloads.download({
