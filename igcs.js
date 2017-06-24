@@ -2,7 +2,7 @@ window.addEventListener("click", notifyExtension);
 
 function notifyExtension(e) {
   console.log("igcs.js: click on ${e}");
-  if (e.target.classList.contains("coreSpriteLikeHeartFull")) {
+  if (e.target.classList.contains("coreSpriteHeartFull")) {
     var parser = document.createElement('a');
     parser.href = e.target.closest("article").querySelector("header a").href;
 
