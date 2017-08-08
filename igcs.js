@@ -20,7 +20,7 @@ function notifyExtension(e) {
     var location = '';
 
     try {
-      pic_url = e.target.closest("article").querySelector("img._icyx7").src;
+      pic_url = e.target.closest("article").querySelector("img._2di5p").src;
     } catch (e) {}
     try {
       username = parser.pathname.replace("/","").replace("/","");
