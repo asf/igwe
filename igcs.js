@@ -29,10 +29,10 @@ function notifyExtension(e) {
       post = e.target.closest("article > div").querySelector("div > ul > li > span").textContent;
     } catch (e) {}
     try {
-      timestamp = e.target.closest("article").querySelector("time").attributes['datetime'].value;
+      timestamp = e.target.closest("article").querySelector("time").attributes["datetime"].value;
     } catch (e) {}
     try {
-      location = e.target.closest('article').querySelector('header div div a').textContent;
+      location = e.target.closest("article").querySelector("header div._60iqg a").textContent;
     } catch (e) {}
 
     browser.runtime.sendMessage({
