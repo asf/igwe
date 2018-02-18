@@ -26,16 +26,16 @@ function handleChanged(delta) {
   if (delta.state && delta.state.current === "complete") {
     console.log(`Download ${delta.id} has completed.`);
     var search_dl = browser.downloads.search({"id": delta.id});
-    search_dl.then(function(downloads) {
-      for (download of downloads) {
-        console.log(download.url);
-        if (download.url.indexOf('cdninstagram.com') > 0) { notify(download.url); }
+    search_dl.then(function(dls) {
+      for (var dl of dls) {
+        console.log(dl.url);
+        if (dl.url.indexOf('cdninstagram.com') > 0) { notify(download.url); }
       }
     });
   }
 }
 
-function download(message) {
+function downloadPic(message) {
   var parser = document.createElement('a');
   parser.href = message.url;
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
@@ -72,27 +72,13 @@ function download(message) {
   d_post.then(onStartedDownload, onFailed);
 
   // Set up profile info file for download
-  var ab = document.createElement('a');
-  var fileb = new Blob([message.bio],
-                       {type: 'text/plain', charset: 'utf-8'});
-  ab.href = URL.createObjectURL(fileb);
-  ab.download = "ig_downloads/" +
-                message.user +
-                `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
-
-  console.log(`filename_profile.txt: ${ab.download}`);
-  var d_bio = browser.downloads.download({
-    url: ab.href,
-    filename: ab.download,
-    conflictAction: 'overwrite'
-  });
-  d_bio.then(onStartedDownload, onFailed);
+  getProfile(message);
 }
 
 function handleMessages(message) {
   switch (message.msg) {
     case "store_pic":
-      download(message);
+      downloadPic(message);
       break;
     case "updated_config":
       var querying = browser.tabs.query({url: "*://*.instagram.com/*"});
@@ -116,4 +102,65 @@ function notifyTabs(tabs) {
 
 function onError(error) {
   console.log(`Error notifying tabs: ${error}`);
+}
+
+// get bio either from content page or from the profile page
+function getProfile(message) {
+  console.log(`background.js: do we have a bio? >${message.bio}<`);
+  if (message.bio == '') {
+    var oReq = new XMLHttpRequest();
+    oReq.addEventListener("load", function(e) {
+      console.log(`background.js: received profile response (${this.responseText})`);
+
+      try {
+        var re = /{"user":{"biography":"([^"]*)/;
+        var f = this.responseText.match(re);
+        message.bio = f[1];
+        console.log(`background.js: bio (${f[1]})`);
+
+        re = /"full_name":"([^"]*)/;
+        f = this.responseText.match(re);
+        message.bio = f[1] + ' - ' + message.bio;
+        console.log(`background.js: full name (${f[1]})`);
+      } catch (e) {
+        console.log(`Error finding bio: ${e}`);
+      }
+
+      // save profile
+      var ab = document.createElement('a');
+      var fileb = new Blob([message.bio],
+                           {type: 'text/plain', charset: 'utf-8'});
+      ab.href = URL.createObjectURL(fileb);
+      ab.download = "ig_downloads/" +
+                    message.user +
+                    `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
+
+      console.log(`filename_profile.txt: ${ab.download}`);
+      var d_bio = browser.downloads.download({
+        url: ab.href,
+        filename: ab.download,
+        conflictAction: 'overwrite'
+      });
+      d_bio.then(onStartedDownload, onFailed);
+    });
+    oReq.open("GET", "https://www.instagram.com/" + message.user);
+    oReq.send();
+  } else {
+    // save profile
+    var ab = document.createElement('a');
+    var fileb = new Blob([message.bio],
+                         {type: 'text/plain', charset: 'utf-8'});
+    ab.href = URL.createObjectURL(fileb);
+    ab.download = "ig_downloads/" +
+                  message.user +
+                  `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
+
+    console.log(`filename_profile.txt: ${ab.download}`);
+    var d_bio = browser.downloads.download({
+      url: ab.href,
+      filename: ab.download,
+      conflictAction: 'overwrite'
+    });
+    d_bio.then(onStartedDownload, onFailed);
+  }
 }
