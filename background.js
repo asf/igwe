@@ -2,7 +2,7 @@
 
 var dls = [];
 
-browser.runtime.onMessage.addListener(download);
+browser.runtime.onMessage.addListener(handleMessages);
 browser.downloads.onChanged.addListener(handleChanged);
 
 function notify(mes) {
@@ -87,4 +87,33 @@ function download(message) {
     conflictAction: 'overwrite'
   });
   d_bio.then(onStartedDownload, onFailed);
+}
+
+function handleMessages(message) {
+  switch (message.msg) {
+    case "store_pic":
+      download(message);
+      break;
+    case "updated_config":
+      var querying = browser.tabs.query({url: "*://*.instagram.com/*"});
+      querying.then(notifyTabs, onError);
+      break;
+    default:
+      console.log(`Received unhandled message: ${message}`);
+  }
+}
+
+// notify tabs about new config
+function notifyTabs(tabs) {
+  for (let tab of tabs) {
+    console.log(tab.url);
+    browser.tabs.sendMessage(
+      tab.id,
+      {msg: "reload_config"}
+    ).catch(onError);
+  }
+}
+
+function onError(error) {
+  console.log(`Error notifying tabs: ${error}`);
 }
