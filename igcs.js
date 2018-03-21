@@ -16,7 +16,7 @@ loadOptions(); // Load config when we get injected into the page
 // Handle click on heart to download image
 function notifyExtension(e) {
   console.log(`igcs.js: click on ${e}`);
-  if (e.target.classList.contains("coreSpriteHeartFull")) {
+  if (e.target.classList.contains("coreSpriteSaveFull") || e.target.classList.contains("coreSpriteHeartFull")) {
     var parser = document.createElement('a');
     parser.href = e.target.closest("article").querySelector("header a").href;
 
