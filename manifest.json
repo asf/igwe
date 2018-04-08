@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "IGDownload",
-  "version": "1.2",
+  "version": "1.3",
   "default_locale": "en",
   "description": "Allows you to download IG fotos.",
 

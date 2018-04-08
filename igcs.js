@@ -3,6 +3,9 @@
 
 var pic_url_closest = '';
 var pic_url_qs = '';
+var vid_url_closest = '';
+var vid_url_qs = '';
+var vid_pic_url_qs = '';
 var post_closest = '';
 var post_qs = '';
 var timestamp_closest = '';
@@ -28,6 +31,8 @@ function notifyExtension(e) {
     }
 
     var pic_url = '';
+    var vid_url = '';
+    var vid_pic_url = '';
     var username = '';
     var post = '';
     var timestamp = '';
@@ -35,6 +40,10 @@ function notifyExtension(e) {
 
     try {
       pic_url = e.target.closest(pic_url_closest).querySelector(pic_url_qs).src;
+    } catch (e) {}
+    try {
+      vid_url = e.target.closest(vid_url_closest).querySelector(vid_url_qs).src;
+      vid_pic_url = e.target.closest(vid_url_closest).querySelector(vid_pic_url_qs).src;
     } catch (e) {}
     try {
       username = parser.pathname.replace("/","").replace("/","");
@@ -51,7 +60,7 @@ function notifyExtension(e) {
 
     browser.runtime.sendMessage({
       "msg": "store_pic",
-      "url": pic_url,
+      "url": pic_url || [vid_url, vid_pic_url],
       "user": username,
       "post": post,
       "bio": bio,
@@ -68,6 +77,9 @@ function loadOptions() {
     console.log("igcs.js: loading config");
     pic_url_closest = result.pic_url_closest || "article";
     pic_url_qs = result.pic_url_qs || "img._2di5p";
+    vid_url_closest = result.vid_url_closest || "article";
+    vid_url_qs = result.vid_url_qs || "video._l6uaz";
+    vid_pic_url_qs = result.vid_pic_url_qs || "img._sajt6";
     post_closest = result.post_closest || "article > div";
     post_qs = result.post_qs || "div > ul > li > span";
     timestamp_closest = result.timestamp_closest || "article";
@@ -83,6 +95,9 @@ function loadOptions() {
   var getting = browser.storage.local.get([
     "pic_url_closest",
     "pic_url_qs",
+    "vid_url_closest",
+    "vid_url_qs",
+    "vid_pic_url_qs",
     "post_closest",
     "post_qs",
     "timestamp_closest",

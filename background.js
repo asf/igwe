@@ -29,26 +29,52 @@ function handleChanged(delta) {
     search_dl.then(function(dls) {
       for (var dl of dls) {
         console.log(dl.url);
-        if (dl.url.indexOf('cdninstagram.com') > 0) { notify(download.url); }
+        if (dl.url.indexOf('cdninstagram.com') > 0) { notify(dl.url); }
       }
     });
   }
 }
 
 function downloadPic(message) {
+  var vid_url;
+  var pic_url;
+
+  if (message.url.constructor === Array) {
+    vid_url = message.url[0];
+    pic_url = message.url[1];
+  } else {
+    pic_url = message.url;
+  }
+
   var parser = document.createElement('a');
-  parser.href = message.url;
+  parser.href = pic_url;
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-  console.log(`filename: ${message.user + "" + parser.pathname}`);
+  console.log(`pic filename: ${message.user + "" + parser.pathname}`);
 
   var d_img = browser.downloads.download({
-    url: message.url,
+    url: pic_url,
     filename: "ig_downloads/" +
                message.user + "/" +
                parser.filename,
     conflictAction: 'overwrite'
   });
   d_img.then(onStartedDownload, onFailed);
+
+  var d_vid;
+  if (vid_url) {
+    parser.href = vid_url;
+    parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
+    console.log(`vid filename: ${message.user + "" + parser.pathname}`);
+
+    d_vid = browser.downloads.download({
+      url: vid_url,
+      filename: "ig_downloads/" +
+                 message.user + "/" +
+                 parser.filename,
+      conflictAction: 'overwrite'
+    });
+    d_vid.then(onStartedDownload, onFailed);
+  }
 
   // Set up post file for download
   var a = document.createElement('a');
