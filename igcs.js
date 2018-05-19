@@ -15,11 +15,43 @@ var location_qs = '';
 
 window.addEventListener("click", notifyExtension);
 loadOptions(); // Load config when we get injected into the page
+addStoreIcon();
+
+function addStoreIcon() {
+  var a = document.createElement('a');
+  var cl = document.createAttribute('class');
+  cl.value = '_p6oxf _6p9ga';
+  a.setAttributeNode(cl);
+
+  var img = document.createElement('img');
+  var src = document.createAttribute('src');
+  var style = document.createAttribute('style');
+  cl = document.createAttribute('class');
+  src.value = browser.extension.getURL('floppy-o.png');
+  style.value = 'width:28px;height:28px;';
+  cl.value = 'storeimg';
+  img.setAttributeNode(src);
+  img.setAttributeNode(style);
+  img.setAttributeNode(cl);
+  a.appendChild(img);
+
+  var iterator = document.evaluate('//*[contains(@class, "_hmd6j")]',
+                                   document, null,
+                                   XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
+                                   null);
+
+  var is = iterator.iterateNext();
+
+  while (is) {
+    is.appendChild(a);
+    is = iterator.iterateNext();
+  }
+}
 
 // Handle click on heart to download image
 function notifyExtension(e) {
   console.log(`igcs.js: click on ${e}`);
-  if (e.target.classList.contains("coreSpriteSaveFull") || e.target.classList.contains("coreSpriteHeartFull")) {
+  if (e.target.classList.contains("coreSpriteSaveFull") || e.target.classList.contains("coreSpriteHeartFull") || e.target.classList.contains('storeimg')) {
     var parser = document.createElement('a');
     parser.href = e.target.closest("article").querySelector("header a").href;
 

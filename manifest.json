@@ -36,6 +36,7 @@
   "options_ui": {
     "page": "options.html",
     "browser_style": true
-  }
+  },
 
+  "web_accessible_resources": ["floppy-o.png"]
 }
