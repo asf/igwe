@@ -12,6 +12,9 @@ var timestamp_closest = '';
 var timestamp_qs = '';
 var location_closest = '';
 var location_qs = '';
+var heart_icon_class = '';
+var store_icon_class = '';
+var bio_class = '';
 
 window.addEventListener("click", notifyExtension);
 loadOptions(); // Load config when we get injected into the page
@@ -51,11 +54,11 @@ function addStoreIcon() {
 // Handle click on heart to download image
 function notifyExtension(e) {
   console.log(`igcs.js: click on ${e}`);
-  if (e.target.classList.contains("coreSpriteSaveFull") || e.target.classList.contains("coreSpriteHeartFull") || e.target.classList.contains('storeimg')) {
+  if (e.target.classList.contains(store_icon_class) || e.target.classList.contains(heart_icon_class) || e.target.classList.contains('storeimg')) {
     var parser = document.createElement('a');
     parser.href = e.target.closest("article").querySelector("header a").href;
 
-    var bio = document.getElementsByClassName("_bugdy");
+    var bio = document.getElementsByClassName(bio_class);
     if (bio.length > 0) {
       bio = bio[0].textContent;
     } else {
@@ -118,6 +121,9 @@ function loadOptions() {
     timestamp_qs = result.timestamp_qs || "time";
     location_closest = result.location_closest || "article";
     location_qs = result.location_qs || "header div._60iqg a";
+    heart_icon_class = result.heart_icon_class || "coreSpriteHeartFull";
+    store_icon_class = result.store_icon_class || "coreSpriteSaveFull";
+    bio_class = result.bio_class || "_bugdy";
   }
 
   function onError(error) {
@@ -135,7 +141,10 @@ function loadOptions() {
     "timestamp_closest",
     "timestamp_qs",
     "location_closest",
-    "location_qs"
+    "location_qs",
+    "heart_icon_class",
+    "store_icon_class",
+    "bio_class"
   ]);
   getting.then(setCurrentChoice, onError);
 }

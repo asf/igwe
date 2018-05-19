@@ -11,9 +11,12 @@ function saveOptions(e) {
     timestamp_closest: document.querySelector("#timestamp_closest").value,
     timestamp_qs: document.querySelector("#timestamp_qs").value,
     location_closest: document.querySelector("#location_closest").value,
-    location_qs: document.querySelector("#location_qs").value
+    location_qs: document.querySelector("#location_qs").value,
+    heart_icon_class: document.querySelector("#heart_icon_class").value,
+    store_icon_class: document.querySelector("#store_icon_class").value,
+    bio_class: document.querySelector("#bio_class").value
   }).then(result =>  {
-    // Let the backend know that we changed the
+    // Let the backend know that we changed the configuration
     document.querySelector("#success_bar").style.display = "block";
     browser.runtime.sendMessage({"msg": "updated_config"});
   });
@@ -33,6 +36,9 @@ function restoreOptions() {
     document.querySelector("#timestamp_qs").value = result.timestamp_qs || "time";
     document.querySelector("#location_closest").value = result.location_closest || "article";
     document.querySelector("#location_qs").value = result.location_qs || "header div._60iqg a";
+    document.querySelector("heart_icon_class").value = result.heart_icon_class || "coreSpriteHeartFull";
+    document.querySelector("store_icon_class").value = result.store_icon_class || "coreSpriteSaveFull";
+    document.querySelector("bio_class").value = result.bio_class || "_bugdy";
   }
 
   function onError(error) {
@@ -50,7 +56,10 @@ function restoreOptions() {
     "timestamp_closest",
     "timestamp_qs",
     "location_closest",
-    "location_qs"
+    "location_qs",
+    "heart_icon_class",
+    "store_icon_class",
+    "bio_class"
   ]);
   getting.then(setCurrentChoice, onError);
 }
