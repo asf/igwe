@@ -15,9 +15,11 @@ var location_qs = '';
 var heart_icon_class = '';
 var store_icon_class = '';
 var bio_class = '';
+var observer;
 
 window.addEventListener("click", notifyExtension);
 loadOptions(); // Load config when we get injected into the page
+addMutationObserver();
 addStoreIcon();
 
 function addStoreIcon() {
@@ -49,6 +51,22 @@ function addStoreIcon() {
     is.appendChild(a);
     is = iterator.iterateNext();
   }
+}
+
+function addMutationObserver() {
+  var targetNode = document.getElementsByTagName('body')[0];
+  var config = { childList: true };
+  var callback = function(mutationsList) {
+      for(var mutation of mutationsList) {
+          if (mutation.type == 'childList') {
+              addStoreIcon();
+          }
+      }
+  };
+
+  observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
+  console.log(`igcs.js: added onserver ${observer}`);
 }
 
 // Handle click on heart to download image
