@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "ig_download@example.com": {
+      "updates": [
+        { "version": "1.3",
+          "update_link": "https://asf-nc.hopto.org/igwe/igdownload-1.3-fx.xpi" },
+        { "version": "1.4",
+          "update_link": "https://asf-nc.hopto.org/igwe/igdownload-1.4-fx.xpi" }
+      ]
+    }
+  }
+}
