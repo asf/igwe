@@ -2,7 +2,7 @@
 
 var dls = [];
 
-browser.runtime.onMessage.addListener(download);
+browser.runtime.onMessage.addListener(handleMessages);
 browser.downloads.onChanged.addListener(handleChanged);
 
 function notify(mes) {
@@ -26,29 +26,55 @@ function handleChanged(delta) {
   if (delta.state && delta.state.current === "complete") {
     console.log(`Download ${delta.id} has completed.`);
     var search_dl = browser.downloads.search({"id": delta.id});
-    search_dl.then(function(downloads) {
-      for (download of downloads) {
-        console.log(download.url);
-        if (download.url.indexOf('cdninstagram.com') > 0) { notify(download.url); }
+    search_dl.then(function(dls) {
+      for (var dl of dls) {
+        console.log(dl.url);
+        if (dl.url.indexOf('cdninstagram.com') > 0) { notify(dl.url); }
       }
     });
   }
 }
 
-function download(message) {
+function downloadPic(message) {
+  var vid_url;
+  var pic_url;
+
+  if (message.url.constructor === Array) {
+    vid_url = message.url[0];
+    pic_url = message.url[1];
+  } else {
+    pic_url = message.url;
+  }
+
   var parser = document.createElement('a');
-  parser.href = message.url;
+  parser.href = pic_url;
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-  console.log(`filename: ${message.user + "" + parser.pathname}`);
+  console.log(`pic filename: ${message.user + "" + parser.pathname}`);
 
   var d_img = browser.downloads.download({
-    url: message.url,
+    url: pic_url,
     filename: "ig_downloads/" +
                message.user + "/" +
                parser.filename,
     conflictAction: 'overwrite'
   });
   d_img.then(onStartedDownload, onFailed);
+
+  var d_vid;
+  if (vid_url) {
+    parser.href = vid_url;
+    parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
+    console.log(`vid filename: ${message.user + "" + parser.pathname}`);
+
+    d_vid = browser.downloads.download({
+      url: vid_url,
+      filename: "ig_downloads/" +
+                 message.user + "/" +
+                 parser.filename,
+      conflictAction: 'overwrite'
+    });
+    d_vid.then(onStartedDownload, onFailed);
+  }
 
   // Set up post file for download
   var a = document.createElement('a');
@@ -72,19 +98,95 @@ function download(message) {
   d_post.then(onStartedDownload, onFailed);
 
   // Set up profile info file for download
-  var ab = document.createElement('a');
-  var fileb = new Blob([message.bio],
-                       {type: 'text/plain', charset: 'utf-8'});
-  ab.href = URL.createObjectURL(fileb);
-  ab.download = "ig_downloads/" +
-                message.user +
-                `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
+  getProfile(message);
+}
 
-  console.log(`filename_profile.txt: ${ab.download}`);
-  var d_bio = browser.downloads.download({
-    url: ab.href,
-    filename: ab.download,
-    conflictAction: 'overwrite'
-  });
-  d_bio.then(onStartedDownload, onFailed);
+function handleMessages(message) {
+  switch (message.msg) {
+    case "store_pic":
+      downloadPic(message);
+      break;
+    case "updated_config":
+      var querying = browser.tabs.query({url: "*://*.instagram.com/*"});
+      querying.then(notifyTabs, onError);
+      break;
+    default:
+      console.log(`Received unhandled message: ${message}`);
+  }
+}
+
+// notify tabs about new config
+function notifyTabs(tabs) {
+  for (let tab of tabs) {
+    console.log(tab.url);
+    browser.tabs.sendMessage(
+      tab.id,
+      {msg: "reload_config"}
+    ).catch(onError);
+  }
+}
+
+function onError(error) {
+  console.log(`Error notifying tabs: ${error}`);
+}
+
+// get bio either from content page or from the profile page
+function getProfile(message) {
+  console.log(`background.js: do we have a bio? >${message.bio}<`);
+  if (message.bio == '') {
+    var oReq = new XMLHttpRequest();
+    oReq.addEventListener("load", function(e) {
+      console.log(`background.js: received profile response (${this.responseText})`);
+
+      try {
+        var re = /{"user":{"biography":"([^"]*)/;
+        var f = this.responseText.match(re);
+        message.bio = f[1];
+        console.log(`background.js: bio (${f[1]})`);
+
+        re = /"full_name":"([^"]*)/;
+        f = this.responseText.match(re);
+        message.bio = f[1] + ' - ' + message.bio;
+        console.log(`background.js: full name (${f[1]})`);
+      } catch (e) {
+        console.log(`Error finding bio: ${e}`);
+      }
+
+      // save profile
+      var ab = document.createElement('a');
+      var fileb = new Blob([message.bio],
+                           {type: 'text/plain', charset: 'utf-8'});
+      ab.href = URL.createObjectURL(fileb);
+      ab.download = "ig_downloads/" +
+                    message.user +
+                    `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
+
+      console.log(`filename_profile.txt: ${ab.download}`);
+      var d_bio = browser.downloads.download({
+        url: ab.href,
+        filename: ab.download,
+        conflictAction: 'overwrite'
+      });
+      d_bio.then(onStartedDownload, onFailed);
+    });
+    oReq.open("GET", "https://www.instagram.com/" + message.user);
+    oReq.send();
+  } else {
+    // save profile
+    var ab = document.createElement('a');
+    var fileb = new Blob([message.bio],
+                         {type: 'text/plain', charset: 'utf-8'});
+    ab.href = URL.createObjectURL(fileb);
+    ab.download = "ig_downloads/" +
+                  message.user +
+                  `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
+
+    console.log(`filename_profile.txt: ${ab.download}`);
+    var d_bio = browser.downloads.download({
+      url: ab.href,
+      filename: ab.download,
+      conflictAction: 'overwrite'
+    });
+    d_bio.then(onStartedDownload, onFailed);
+  }
 }
