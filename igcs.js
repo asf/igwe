@@ -16,6 +16,7 @@ var heart_icon_class = '';
 var store_icon_class = '';
 var bio_class = '';
 var observer;
+var iconsAdded = [];
 
 window.addEventListener("click", notifyExtension);
 loadOptions(); // Load config when we get injected into the page
@@ -23,6 +24,20 @@ addMutationObserver();
 addStoreIcon();
 
 function addStoreIcon() {
+  console.log('igcs.js: Entering addStoreIcon');
+  var x = document.body.querySelectorAll('._hmd6j');
+  var a;
+  for(var i=0; i < x.length; i++ ) {
+    if (a === undefined) a = storeIconElement();
+    if (!iconsAdded.includes(x[i])) {
+      x[i].appendChild(a.cloneNode(true));
+      iconsAdded.push(x[i]);
+      console.log(`igcs.js: adding store icon to ${x[i]}`);
+    }
+  }
+}
+
+function storeIconElement() {
   var a = document.createElement('a');
   var cl = document.createAttribute('class');
   cl.value = '_p6oxf _6p9ga';
@@ -39,23 +54,12 @@ function addStoreIcon() {
   img.setAttributeNode(style);
   img.setAttributeNode(cl);
   a.appendChild(img);
-
-  var iterator = document.evaluate('//*[contains(@class, "_hmd6j")]',
-                                   document, null,
-                                   XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
-                                   null);
-
-  var is = iterator.iterateNext();
-
-  while (is) {
-    is.appendChild(a);
-    is = iterator.iterateNext();
-  }
+  return a;
 }
 
 function addMutationObserver() {
   var targetNode = document.getElementsByTagName('body')[0];
-  var config = { childList: true };
+  var config = { childList: true, subtree: true };
   var callback = function(mutationsList) {
       for(var mutation of mutationsList) {
           if (mutation.type == 'childList') {
