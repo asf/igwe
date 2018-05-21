@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "IGDownload",
-  "version": "1.0",
+  "version": "1.4",
   "default_locale": "en",
   "description": "Allows you to download IG fotos.",
 
@@ -10,7 +10,9 @@
     "contextMenus",
     "activeTab",
     "downloads",
-    "notifications"
+    "notifications",
+    "storage",
+    "tabs"
 ],
 
   "background": {
@@ -27,7 +29,15 @@
   "applications": {
     "gecko": {
       "id": "ig_download@example.com",
-      "strict_min_version": "42.0"
+      "strict_min_version": "42.0",
+      "update_url": "https://asf-nc.hopto.org/igwe/updates.json"
     }
-  }
+  },
+
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true
+  },
+
+  "web_accessible_resources": ["floppy-o.png"]
 }

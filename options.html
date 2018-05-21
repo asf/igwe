@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style type="text/css">
+      label {
+        font-size: 13px;
+        font-weight: 400;
+        color: #0c0c0d;
+        padding-bottom: 4px;
+        display: block;
+      }
+      input[type="text"] {
+        height: 32px;
+        font-size: 15px;
+        font-weight: 400;
+        color: #0c0c0d;
+      }
+      form {
+        margin-left: 6px;
+      }
+      .msgbar {
+        font-size: 13px;
+        min-height: 32px;
+        width: auto;
+        background-color: #12bc00;
+        vertical-align: middle;
+        line-height: 32px;
+        border-radius: 4px;
+        margin: 0px 6px 12px 6px;
+        display: none;
+      }
+      .msgbar > img {
+        padding: 2px 4px 4px 4px;
+        height: 24px;
+        width: 24px;
+        vertical-align: middle;
+        line-height: 32px;
+      }
+      .row {
+        display: inline-block;
+        margin-right: 12px;
+      }
+      button.browser-style {
+        padding: 4px 8px;
+        height: 32px;
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="browser-style msgbar" id="success_bar"><img src="check-16.svg">Saved Settings</div>
+
+    <form>
+      <div class="row">
+        <div class="browser-style"><label for="pic_url_closest">Picture Closest</label><div><input type="text" id="pic_url_closest" /></div></div>
+        <div class="browser-style"><label for="pic_url_qs">Picture Query Selector</label><div><input type="text" id="pic_url_qs" /></div></div>
+        <div class="browser-style"><label for="vid_url_closest">Video Closest</label><div><input type="text" id="vid_url_closest" /></div></div>
+        <div class="browser-style"><label for="vid_url_qs">Video Query Selector</label><div><input type="text" id="vid_url_qs" /></div></div>
+        <div class="browser-style"><label for="vid_pic_url_qs">Video Still Query Selector</label><div><input type="text" id="vid_pic_url_qs" /></div></div>
+        <div class="browser-style"><label for="heart_icon_class">Heart It Class Name</label><div><input type="text" id="vid_pic_url_qs" /></div></div>
+        <div class="browser-style"><label for="store_icon_class">Save It Class Name</label><div><input type="text" id="vid_pic_url_qs" /></div></div>
+      </div>
+      <div class="row">
+        <div class="browser-style"><label for="post_closest">Post Closest</label><div><input type="text" id="post_closest" /></div></div>
+        <div class="browser-style"><label for="post_qs">Post Query Selector</label><div><input type="text" id="post_qs" /></div></div>
+        <div class="browser-style"><label for="timestamp_closest">Timestamp Closest</label><div><input type="text" id="timestamp_closest" /></div></div>
+        <div class="browser-style"><label for="timestamp_qs">Timestamp Query Selector</label><div><input type="text" id="timestamp_qs" /></div></div>
+        <div class="browser-style"><label for="location_closest">Location Closest</label><div><input type="text" id="location_closest" /></div></div>
+        <div class="browser-style"><label for="location_qs">Location Query Selector</label><div><input type="text" id="location_qs" /></div></div>
+        <div class="browser-style"><label for="bio_class">Bio Query Selector</label><div><input type="text" id="location_qs" /></div></div>
+      </div>
+      <div style="break: left; width: 100%;" class="browser-style setting"><button class="browser-style">Save Settings</button></div>
+    </form>
+
+    <script src="options.js"></script>
+
+  </body>
+
+</html>
