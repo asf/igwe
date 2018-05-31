@@ -40,7 +40,7 @@ function addStoreIcon() {
 function storeIconElement() {
   var a = document.createElement('a');
   var cl = document.createAttribute('class');
-  cl.value = '_p6oxf _6p9ga';
+  cl.value = 'fscHb';
   a.setAttributeNode(cl);
 
   var img = document.createElement('img');
@@ -48,7 +48,7 @@ function storeIconElement() {
   var style = document.createAttribute('style');
   cl = document.createAttribute('class');
   src.value = browser.extension.getURL('floppy-o.png');
-  style.value = 'width:28px;height:28px;';
+  style.value = 'width:24px;height:24px;';
   cl.value = 'storeimg';
   img.setAttributeNode(src);
   img.setAttributeNode(style);
@@ -133,19 +133,19 @@ function loadOptions() {
   function setCurrentChoice(result) {
     console.log("igcs.js: loading config");
     pic_url_closest = result.pic_url_closest || "article";
-    pic_url_qs = result.pic_url_qs || "img._2di5p";
+    pic_url_qs = result.pic_url_qs || "img.FFVAD";
     vid_url_closest = result.vid_url_closest || "article";
-    vid_url_qs = result.vid_url_qs || "video._l6uaz";
-    vid_pic_url_qs = result.vid_pic_url_qs || "img._sajt6";
+    vid_url_qs = result.vid_url_qs || "video.tWeCl";
+    vid_pic_url_qs = result.vid_pic_url_qs || "img._8jZFn";
     post_closest = result.post_closest || "article > div";
     post_qs = result.post_qs || "div > ul > li > span";
     timestamp_closest = result.timestamp_closest || "article";
     timestamp_qs = result.timestamp_qs || "time";
     location_closest = result.location_closest || "article";
-    location_qs = result.location_qs || "header div._60iqg a";
-    heart_icon_class = result.heart_icon_class || "coreSpriteHeartFull";
-    store_icon_class = result.store_icon_class || "coreSpriteSaveFull";
-    bio_class = result.bio_class || "_bugdy";
+    location_qs = result.location_qs || "header div.M30cS a";
+    heart_icon_class = result.heart_icon_class || "plqBR";
+    store_icon_class = result.store_icon_class || "CE8hu";
+    bio_class = result.bio_class || "-vDIg";
   }
 
   function onError(error) {
