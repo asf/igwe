@@ -49,7 +49,7 @@ function downloadPic(message) {
   var parser = document.createElement('a');
   parser.href = pic_url;
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-  console.log(`pic filename: ${message.user + "" + parser.pathname}`);
+  console.log(`background.js: pic filename: ${message.user + "" + parser.pathname}`);
 
   var d_img = browser.downloads.download({
     url: pic_url,
@@ -64,7 +64,7 @@ function downloadPic(message) {
   if (vid_url) {
     parser.href = vid_url;
     parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-    console.log(`vid filename: ${message.user + "" + parser.pathname}`);
+    console.log(`background.js: vid filename: ${message.user + "" + parser.pathname}`);
 
     d_vid = browser.downloads.download({
       url: vid_url,
@@ -111,7 +111,7 @@ function handleMessages(message) {
       querying.then(notifyTabs, onError);
       break;
     default:
-      console.log(`Received unhandled message: ${message}`);
+      console.log(`background.js: Received unhandled message: ${message}`);
   }
 }
 
@@ -127,7 +127,7 @@ function notifyTabs(tabs) {
 }
 
 function onError(error) {
-  console.log(`Error notifying tabs: ${error}`);
+  console.log(`background.js: Error notifying tabs: ${error}`);
 }
 
 // get bio either from content page or from the profile page
@@ -149,7 +149,7 @@ function getProfile(message) {
         message.bio = f[1] + ' - ' + message.bio;
         console.log(`background.js: full name (${f[1]})`);
       } catch (e) {
-        console.log(`Error finding bio: ${e}`);
+        console.log(`backhround.js: Error finding bio: ${e}`);
       }
 
       // save profile

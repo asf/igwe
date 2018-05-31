@@ -98,24 +98,25 @@ function notifyExtension(e) {
 
     try {
       pic_url = e.target.closest(pic_url_closest).querySelector(pic_url_qs).src;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find pic_url_qs ${e}`); }
     try {
       vid_url = e.target.closest(vid_url_closest).querySelector(vid_url_qs).src;
       vid_pic_url = e.target.closest(vid_url_closest).querySelector(vid_pic_url_qs).src;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find vid_url_qs or vid_pic_url_qs ${e}`); }
     try {
       username = parser.pathname.replace("/","").replace("/","");
-    } catch (e) {}
+    } catch (e) { console.error(`igcs.js: couldn't identify username ${e}`); }
     try {
       post = e.target.closest(post_closest).querySelector(post_qs).textContent;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find post_qs ${e}`); }
     try {
       timestamp = e.target.closest(timestamp_closest).querySelector(timestamp_qs).attributes["datetime"].value;
-    } catch (e) {}
+    } catch (e) { console.error(`igcs.js: couldn't find timestamp_qs ${e}`); }
     try {
       location = e.target.closest(location_closest).querySelector(location_qs).textContent;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find location_qs ${e}`); }
 
+    console.log(`igcs.js: sending download message`);
     browser.runtime.sendMessage({
       "msg": "store_pic",
       "url": pic_url || [vid_url, vid_pic_url],
@@ -174,7 +175,7 @@ function loadOptions() {
   getting.then(setCurrentChoice, onError);
 }
 
-// Listen to changed in the configuration
+// Listen to changes in the configuration
 browser.runtime.onMessage.addListener(request => {
   if (request.msg === "reload_config") {
     console.log("igcs.js: config changed");
