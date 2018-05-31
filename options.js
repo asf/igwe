@@ -14,7 +14,8 @@ function saveOptions(e) {
     location_qs: document.querySelector("#location_qs").value,
     heart_icon_class: document.querySelector("#heart_icon_class").value,
     store_icon_class: document.querySelector("#store_icon_class").value,
-    bio_class: document.querySelector("#bio_class").value
+    bio_class: document.querySelector("#bio_class").value,
+    action_bar_qs: document.querySelector("#action_bar_qs").value
   }).then(result =>  {
     // Let the backend know that we changed the configuration
     document.querySelector("#success_bar").style.display = "block";
@@ -39,6 +40,7 @@ function restoreOptions() {
     document.querySelector("#heart_icon_class").value = result.heart_icon_class || "plqBR";
     document.querySelector("#store_icon_class").value = result.store_icon_class || "CE8hu";
     document.querySelector("#bio_class").value = result.bio_class || "-vDIg";
+    document.querySelector("#action_bar_qs").value = result.action_bar_qs || ".Slqrh";
   }
 
   function onError(error) {
@@ -59,7 +61,8 @@ function restoreOptions() {
     "location_qs",
     "heart_icon_class",
     "store_icon_class",
-    "bio_class"
+    "bio_class",
+    "action_bar_qs"
   ]);
   getting.then(setCurrentChoice, onError);
 }

@@ -15,6 +15,7 @@ var location_qs = '';
 var heart_icon_class = '';
 var store_icon_class = '';
 var bio_class = '';
+var action_bar_qs = '';
 var observer;
 var iconsAdded = [];
 
@@ -25,7 +26,7 @@ addStoreIcon();
 
 function addStoreIcon() {
   console.log('igcs.js: Entering addStoreIcon');
-  var x = document.body.querySelectorAll('._hmd6j');
+  var x = document.body.querySelectorAll(action_bar_qs);
   var a;
   for(var i=0; i < x.length; i++ ) {
     if (a === undefined) a = storeIconElement();
@@ -146,6 +147,7 @@ function loadOptions() {
     heart_icon_class = result.heart_icon_class || "plqBR";
     store_icon_class = result.store_icon_class || "CE8hu";
     bio_class = result.bio_class || "-vDIg";
+    action_bar_qs = result.action_bar_qs || ".Slqrh";
   }
 
   function onError(error) {
@@ -166,7 +168,8 @@ function loadOptions() {
     "location_qs",
     "heart_icon_class",
     "store_icon_class",
-    "bio_class"
+    "bio_class",
+    "action_bar_qs"
   ]);
   getting.then(setCurrentChoice, onError);
 }
