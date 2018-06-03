@@ -15,6 +15,7 @@ var location_qs = '';
 var heart_icon_class = '';
 var store_icon_class = '';
 var bio_class = '';
+var action_bar_qs = '';
 var observer;
 var iconsAdded = [];
 
@@ -25,7 +26,7 @@ addStoreIcon();
 
 function addStoreIcon() {
   console.log('igcs.js: Entering addStoreIcon');
-  var x = document.body.querySelectorAll('._hmd6j');
+  var x = document.body.querySelectorAll(action_bar_qs);
   var a;
   for(var i=0; i < x.length; i++ ) {
     if (a === undefined) a = storeIconElement();
@@ -40,7 +41,7 @@ function addStoreIcon() {
 function storeIconElement() {
   var a = document.createElement('a');
   var cl = document.createAttribute('class');
-  cl.value = '_p6oxf _6p9ga';
+  cl.value = 'fscHb';
   a.setAttributeNode(cl);
 
   var img = document.createElement('img');
@@ -48,7 +49,7 @@ function storeIconElement() {
   var style = document.createAttribute('style');
   cl = document.createAttribute('class');
   src.value = browser.extension.getURL('floppy-o.png');
-  style.value = 'width:28px;height:28px;';
+  style.value = 'width:24px;height:24px;';
   cl.value = 'storeimg';
   img.setAttributeNode(src);
   img.setAttributeNode(style);
@@ -97,24 +98,25 @@ function notifyExtension(e) {
 
     try {
       pic_url = e.target.closest(pic_url_closest).querySelector(pic_url_qs).src;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find pic_url_qs ${e}`); }
     try {
       vid_url = e.target.closest(vid_url_closest).querySelector(vid_url_qs).src;
       vid_pic_url = e.target.closest(vid_url_closest).querySelector(vid_pic_url_qs).src;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find vid_url_qs or vid_pic_url_qs ${e}`); }
     try {
       username = parser.pathname.replace("/","").replace("/","");
-    } catch (e) {}
+    } catch (e) { console.error(`igcs.js: couldn't identify username ${e}`); }
     try {
       post = e.target.closest(post_closest).querySelector(post_qs).textContent;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find post_qs ${e}`); }
     try {
       timestamp = e.target.closest(timestamp_closest).querySelector(timestamp_qs).attributes["datetime"].value;
-    } catch (e) {}
+    } catch (e) { console.error(`igcs.js: couldn't find timestamp_qs ${e}`); }
     try {
       location = e.target.closest(location_closest).querySelector(location_qs).textContent;
-    } catch (e) {}
+    } catch (e) { console.warn(`igcs.js: couldn't find location_qs ${e}`); }
 
+    console.log(`igcs.js: sending download message`);
     browser.runtime.sendMessage({
       "msg": "store_pic",
       "url": pic_url || [vid_url, vid_pic_url],
@@ -133,19 +135,20 @@ function loadOptions() {
   function setCurrentChoice(result) {
     console.log("igcs.js: loading config");
     pic_url_closest = result.pic_url_closest || "article";
-    pic_url_qs = result.pic_url_qs || "img._2di5p";
+    pic_url_qs = result.pic_url_qs || "img.FFVAD";
     vid_url_closest = result.vid_url_closest || "article";
-    vid_url_qs = result.vid_url_qs || "video._l6uaz";
-    vid_pic_url_qs = result.vid_pic_url_qs || "img._sajt6";
+    vid_url_qs = result.vid_url_qs || "video.tWeCl";
+    vid_pic_url_qs = result.vid_pic_url_qs || "img._8jZFn";
     post_closest = result.post_closest || "article > div";
     post_qs = result.post_qs || "div > ul > li > span";
     timestamp_closest = result.timestamp_closest || "article";
     timestamp_qs = result.timestamp_qs || "time";
     location_closest = result.location_closest || "article";
-    location_qs = result.location_qs || "header div._60iqg a";
-    heart_icon_class = result.heart_icon_class || "coreSpriteHeartFull";
-    store_icon_class = result.store_icon_class || "coreSpriteSaveFull";
-    bio_class = result.bio_class || "_bugdy";
+    location_qs = result.location_qs || "header div.M30cS a";
+    heart_icon_class = result.heart_icon_class || "plqBR";
+    store_icon_class = result.store_icon_class || "CE8hu";
+    bio_class = result.bio_class || "-vDIg";
+    action_bar_qs = result.action_bar_qs || ".Slqrh";
   }
 
   function onError(error) {
@@ -166,12 +169,13 @@ function loadOptions() {
     "location_qs",
     "heart_icon_class",
     "store_icon_class",
-    "bio_class"
+    "bio_class",
+    "action_bar_qs"
   ]);
   getting.then(setCurrentChoice, onError);
 }
 
-// Listen to changed in the configuration
+// Listen to changes in the configuration
 browser.runtime.onMessage.addListener(request => {
   if (request.msg === "reload_config") {
     console.log("igcs.js: config changed");

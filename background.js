@@ -49,7 +49,7 @@ function downloadPic(message) {
   var parser = document.createElement('a');
   parser.href = pic_url;
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-  console.log(`pic filename: ${message.user + "" + parser.pathname}`);
+  console.log(`background.js: pic filename: ${message.user + "" + parser.pathname}`);
 
   var d_img = browser.downloads.download({
     url: pic_url,
@@ -64,7 +64,7 @@ function downloadPic(message) {
   if (vid_url) {
     parser.href = vid_url;
     parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-    console.log(`vid filename: ${message.user + "" + parser.pathname}`);
+    console.log(`background.js: vid filename: ${message.user + "" + parser.pathname}`);
 
     d_vid = browser.downloads.download({
       url: vid_url,
@@ -111,7 +111,7 @@ function handleMessages(message) {
       querying.then(notifyTabs, onError);
       break;
     default:
-      console.log(`Received unhandled message: ${message}`);
+      console.log(`background.js: Received unhandled message: ${message}`);
   }
 }
 
@@ -127,7 +127,7 @@ function notifyTabs(tabs) {
 }
 
 function onError(error) {
-  console.log(`Error notifying tabs: ${error}`);
+  console.log(`background.js: Error notifying tabs: ${error}`);
 }
 
 // get bio either from content page or from the profile page
@@ -137,6 +137,7 @@ function getProfile(message) {
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", function(e) {
       console.log(`background.js: received profile response (${this.responseText})`);
+      var profile_pic_url_hd;
 
       try {
         var re = /{"user":{"biography":"([^"]*)/;
@@ -148,8 +149,12 @@ function getProfile(message) {
         f = this.responseText.match(re);
         message.bio = f[1] + ' - ' + message.bio;
         console.log(`background.js: full name (${f[1]})`);
+
+        re = /"profile_pic_url_hd":"([^"]*)/
+        f = this.responseText.match(re);
+        profile_pic_url_hd = f[1];
       } catch (e) {
-        console.log(`Error finding bio: ${e}`);
+        console.log(`backhround.js: Error finding bio: ${e}`);
       }
 
       // save profile
@@ -168,6 +173,19 @@ function getProfile(message) {
         conflictAction: 'overwrite'
       });
       d_bio.then(onStartedDownload, onFailed);
+
+      // save profile pic
+      var parser = document.createElement('a');
+      parser.href = profile_pic_url_hd;
+      parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
+      var d_profile_pic = browser.downloads.download({
+        url: profile_pic_url_hd,
+        filename: "ig_downloads/" +
+                   message.user + "/profile_pics/" +
+                   parser.filename,
+        conflictAction: 'overwrite'
+      });
+      d_profile_pic.then(onStartedDownload, onFailed);
     });
     oReq.open("GET", "https://www.instagram.com/" + message.user);
     oReq.send();
