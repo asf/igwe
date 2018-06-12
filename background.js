@@ -5,14 +5,25 @@ var dls = {};
 browser.runtime.onMessage.addListener(handleMessages);
 browser.downloads.onChanged.addListener(handleChanged);
 
+function parseDate(input) {
+  // 2018-06-12T17:59:54.000Z
+  return new Date(Date.UTC(
+    parseInt(input.slice(0, 4), 10),
+    parseInt(input.slice(5, 7), 10) - 1,
+    parseInt(input.slice(8, 10), 10),
+    parseInt(input.slice(11, 13), 10),
+    parseInt(input.slice(14, 16), 10),
+    parseInt(input.slice(17, 19), 10)
+  ));
+}
+
 function notify(dl_id) {
   var mes = dls[dl_id];
-  //var m = mes.toString().split('/');
   browser.notifications.create({
     "type": "basic",
     "iconUrl": getPicUrl(mes),
     "title": "Your IG download has completed!",
-    "message": `Download "${mes.user}" is done.`
+    "message": `Successfully downloaded ${mes.user}'s' picture posted on ${parseDate(mes.timestamp).toLocaleString('en-US', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' })}.`
   }).catch(onError);
 }
 
@@ -53,7 +64,7 @@ function handleChanged(delta) {
 
     // show browser notification
     try {
-      notify(delta.id);
+      if (dls[delta.id].artefact_icon == 'image' || dls[delta.id].artefact_icon == 'file-video') { notify(delta.id) }
     } catch(ex) {}
 
     // delete download from browser
