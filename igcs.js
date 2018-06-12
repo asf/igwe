@@ -79,50 +79,96 @@ function addMutationObserver() {
 
   observer = new MutationObserver(callback);
   observer.observe(targetNode, config);
-  console.log(`igcs.js: added onserver ${observer}`);
+  console.log(`igcs.js: added observer ${observer}`);
 }
 
 // Handle click on heart to download image
 function notifyExtension(e) {
   console.log(`igcs.js: click on ${e}`);
-  if (e.target.classList.contains(store_icon_class) || e.target.classList.contains(heart_icon_class) || e.target.classList.contains('storeimg')) {
-    var parser = document.createElement('a');
-    parser.href = e.target.closest("article").querySelector("header a").href;
+  if (e.target.classList.contains(store_icon_class)
+    || e.target.classList.contains(heart_icon_class)
+    || e.target.classList.contains('storeimg')) {
 
-    var bio = document.getElementsByClassName(bio_class);
-    if (bio.length > 0) {
-      bio = bio[0].textContent;
-    } else {
-      bio = '';
-    }
+    show_feedback_in_ui(e);
+    collect_info_for_dl(e);
+  }
+}
 
-    var pic_url = '';
-    var vid_url = '';
-    var vid_pic_url = '';
-    var username = '';
-    var post = '';
-    var timestamp = '';
-    var location = '';
+function show_feedback_in_ui(e) {
+  var img_cont;
+
+  console.log(`igcs.js: entered show_feedback_in_ui`);
+  try {
+    img_cont = e.target.closest(pic_url_closest).querySelector(pic_url_qs).parentNode.parentNode;
+  } catch(ex) { console.warn(`igcs.js: could not find image: ${ex}`) }
+
+
+  if (img_cont === undefined) {
+    try {
+      img_cont = e.target.closest(vid_url_closest).querySelector(vid_pic_url_qs).parentNode.parentNode;
+      console.log(`igcs.js: show_feedback_in_ui: found video`);
+    } catch(ex) { console.warn(`igcs.js: could not find video: ${ex}`) }
+  }
+
+  // clear notification section if it exists
+  try {
+    img_cont.parentNode.parentNode.querySelector('ul[class~="igcs-notice"]').remove();
+  } catch (e) {}
+
+  var notice = document.createElement('ul');
+  notice.setAttribute('class', 'fa-ul igcs-notice');
+  img_cont.parentNode.parentNode.appendChild(notice);
+}
+
+function collect_info_for_dl(e) {
+  var parser = document.createElement('a');
+  parser.href = e.target.closest("article").querySelector("header a").href;
+
+  var bio = document.getElementsByClassName(bio_class);
+  if (bio.length > 0) {
+    bio = bio[0].textContent;
+  } else {
+    bio = '';
+  }
+
+  var pic_url = '';
+  var vid_url = '';
+  var vid_pic_url = '';
+  var username = '';
+  var post = '';
+  var timestamp = '';
+  var location = '';
+  var article = '';
+
+  try {
+    pic_url = e.target.closest(pic_url_closest).querySelector(pic_url_qs).src;
+  } catch (e) { console.warn(`igcs.js: couldn't find pic_url_qs ${e}`); }
+  try {
+    vid_url = e.target.closest(vid_url_closest).querySelector(vid_url_qs).src;
+    vid_pic_url = e.target.closest(vid_url_closest).querySelector(vid_pic_url_qs).src;
+  } catch (e) { console.warn(`igcs.js: couldn't find vid_url_qs or vid_pic_url_qs ${e}`); }
+  try {
+    username = parser.pathname.replace("/","").replace("/","");
+  } catch (e) { console.error(`igcs.js: couldn't identify username ${e}`); }
+  try {
+    post = e.target.closest(post_closest).querySelector(post_qs).textContent;
+  } catch (e) { console.warn(`igcs.js: couldn't find post_qs ${e}`); }
+  try {
+    timestamp = e.target.closest(timestamp_closest).querySelector(timestamp_qs).attributes["datetime"].value;
+  } catch (e) { console.error(`igcs.js: couldn't find timestamp_qs ${e}`); }
+  try {
+    location = e.target.closest(location_closest).querySelector(location_qs).textContent;
+  } catch (e) { console.warn(`igcs.js: couldn't find location_qs ${e}`); }
+
+  sha256(pic_url+vid_url).then(function(digest) {
+    console.log(`igcs.js: hash for current article ${digest}`);
 
     try {
-      pic_url = e.target.closest(pic_url_closest).querySelector(pic_url_qs).src;
-    } catch (e) { console.warn(`igcs.js: couldn't find pic_url_qs ${e}`); }
-    try {
-      vid_url = e.target.closest(vid_url_closest).querySelector(vid_url_qs).src;
-      vid_pic_url = e.target.closest(vid_url_closest).querySelector(vid_pic_url_qs).src;
-    } catch (e) { console.warn(`igcs.js: couldn't find vid_url_qs or vid_pic_url_qs ${e}`); }
-    try {
-      username = parser.pathname.replace("/","").replace("/","");
-    } catch (e) { console.error(`igcs.js: couldn't identify username ${e}`); }
-    try {
-      post = e.target.closest(post_closest).querySelector(post_qs).textContent;
-    } catch (e) { console.warn(`igcs.js: couldn't find post_qs ${e}`); }
-    try {
-      timestamp = e.target.closest(timestamp_closest).querySelector(timestamp_qs).attributes["datetime"].value;
-    } catch (e) { console.error(`igcs.js: couldn't find timestamp_qs ${e}`); }
-    try {
-      location = e.target.closest(location_closest).querySelector(location_qs).textContent;
-    } catch (e) { console.warn(`igcs.js: couldn't find location_qs ${e}`); }
+      article = e.target.closest(pic_url_closest);
+    } catch (e) { console.warn(`igcs.js: couldn't find pic_url_closest ${e}`); }
+    var digest_attribute = document.createAttribute('data-igdl_id');
+    digest_attribute.value = digest;
+    article.setAttributeNode(digest_attribute);
 
     console.log(`igcs.js: sending download message`);
     browser.runtime.sendMessage({
@@ -132,13 +178,14 @@ function notifyExtension(e) {
       "post": post,
       "bio": bio,
       "timestamp": timestamp,
-      "location": location
+      "location": location,
+      "digest": digest
     });
-  }
+  });
 }
 
 // Load config
-function loadOptions() {
+function loadOptions(callback_function) {
 
   function setCurrentChoice(result) {
     console.log("igcs.js: loading config");
@@ -157,6 +204,7 @@ function loadOptions() {
     store_icon_class = result.store_icon_class || "CE8hu";
     bio_class = result.bio_class || "-vDIg";
     action_bar_qs = result.action_bar_qs || ".Slqrh";
+    callback_function();
   }
 
   function onError(error) {
@@ -185,8 +233,62 @@ function loadOptions() {
 
 // Listen to changes in the configuration
 browser.runtime.onMessage.addListener(request => {
-  if (request.msg === "reload_config") {
-    console.log("igcs.js: config changed");
-    loadOptions();
+  switch (request.msg) {
+    case "reload_config":
+      console.log("igcs.js: config changed");
+      loadOptions();
+      break;
+    case "download_started":
+      getNoticeSection(request.digest).appendChild(generateIcon(request));
+      break;
+    case "download_completed":
+      var icon = document.body.querySelector('article[data-igdl_id="'+request.digest+'"] ul.igcs-notice li[class~="'+request.artefact_icon+'"] svg');
+      console.log(`igcs.js: Download completed for: ${request.artefact_icon}`);
+      icon.classList.remove('dl-waiting');
+      icon.classList.add('dl-done');
+      break;
+    default:
+      console.log(`igcs.js: Received unhandled message: ${request}`);
   }
 });
+
+function getNoticeSection(digest) {
+  return document.body.querySelector('article[data-igdl_id="'+digest+'"] ul.igcs-notice');
+}
+
+function generateIcon(request) {
+  var icon_div = document.createElement('li');
+  icon_div.setAttribute('class', 'fa-li ' + request.artefact_icon);
+  var icon = document.createElement('i');
+  icon.setAttribute('class', 'dl-waiting far fa-fw fa-' + request.artefact_icon);
+  icon.setAttribute('title', request.artefact_type);
+  icon_div.appendChild(icon);
+  return icon_div;
+//  return icon_div.appendChild(icon.cloneNode(true)).cloneNode(true);
+}
+
+function sha256(str) {
+  // We transform the string into an arraybuffer.
+  var buffer = new TextEncoder("utf-8").encode(str);
+  return crypto.subtle.digest("SHA-256", buffer).then(function (hash) {
+    return hex(hash);
+  });
+}
+
+function hex(buffer) {
+  var hexCodes = [];
+  var view = new DataView(buffer);
+  for (var i = 0; i < view.byteLength; i += 4) {
+    // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
+    var value = view.getUint32(i)
+    // toString(16) will give the hex representation of the number without padding
+    var stringValue = value.toString(16)
+    // We use concatenation and slice for padding
+    var padding = '00000000'
+    var paddedValue = (padding + stringValue).slice(-padding.length)
+    hexCodes.push(paddedValue);
+  }
+
+  // Join all the hex strings into one
+  return hexCodes.join("");
+}

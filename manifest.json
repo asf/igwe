@@ -22,7 +22,8 @@
   "content_scripts": [
     {
       "matches": ["*://*.instagram.com/*"],
-      "js": ["igcs.js"]
+      "js": ["igcs.js"],
+      "css": ["content.css"]
     }
   ],
 
