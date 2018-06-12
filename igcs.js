@@ -19,19 +19,21 @@ var action_bar_qs = '';
 var observer;
 var iconsAdded = [];
 
-window.addEventListener("click", notifyExtension);
-loadOptions(); // Load config when we get injected into the page
-addMutationObserver();
-addStoreIcon();
 var se = document.createElement('script');
 se.setAttribute('src', 'https://use.fontawesome.com/releases/v5.0.13/js/all.js');
 se.setAttribute('integrity', 'sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe');
 se.setAttribute('crossorigin', 'anonymous');
 document.body.appendChild(se);
 
+// Load config when we get injected into the page
+loadOptions(function() {
+  console.log(`igcs.js: initialize`);
+  window.addEventListener("click", notifyExtension);
+  addMutationObserver();
+  addStoreIcon();
+});
 
 function addStoreIcon() {
-  console.log('igcs.js: Entering addStoreIcon');
   var x = document.body.querySelectorAll(action_bar_qs);
   var a;
   for(var i=0; i < x.length; i++ ) {
