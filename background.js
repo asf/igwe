@@ -1,21 +1,34 @@
 'use strict';
 
-var dls = [];
+var dls = {};
 
 browser.runtime.onMessage.addListener(handleMessages);
 browser.downloads.onChanged.addListener(handleChanged);
 
-function notify(mes) {
+function notify(dl_id) {
+  var mes = dls[dl_id];
   //var m = mes.toString().split('/');
   browser.notifications.create({
     "type": "basic",
+    "iconUrl": getPicUrl(mes),
     "title": "Your IG download has completed!",
-    "message": `Download "${mes}" is done.`
-  });
+    "message": `Download "${mes.user}" is done.`
+  }).catch(onError);
 }
 
-function onStartedDownload(id) {
-  console.log(`Started downloading: ${id}`);
+function onStartedDownload(message, id) {
+  console.log(`Started downloading for ${message.user}: ${id} with ${message.artefact_icon}`);
+
+  // store message based on id
+  dls[id] = message;
+
+  // notify content script
+  browser.tabs.sendMessage(message.sender.tab.id, {
+    msg: "download_started",
+    digest: message.digest,
+    artefact_type: message.artefact_type,
+    artefact_icon: message.artefact_icon
+  }).catch(onError);
 }
 
 function onFailed(error) {
@@ -23,28 +36,50 @@ function onFailed(error) {
 }
 
 function handleChanged(delta) {
+  try {
+    console.log(`background.js: dl_changes ${delta.state.current}, ${delta.bytesReceived}`);
+  } catch(ex) {}
+
   if (delta.state && delta.state.current === "complete") {
-    console.log(`Download ${delta.id} has completed.`);
-    var search_dl = browser.downloads.search({"id": delta.id});
-    search_dl.then(function(dls) {
-      for (var dl of dls) {
-        console.log(dl.url);
-        if (dl.url.indexOf('cdninstagram.com') > 0) { notify(dl.url); }
-      }
-    });
+    console.log(`Download ${delta.id} has completed. ${dls[delta.id].artefact_icon}`);
+
+    // notify content script
+    browser.tabs.sendMessage(dls[delta.id].sender.tab.id, {
+      msg: "download_completed",
+      digest: dls[delta.id].digest,
+      artefact_type: dls[delta.id].artefact_type,
+      artefact_icon: dls[delta.id].artefact_icon
+    }).catch(onError);
+
+    // show browser notification
+    try {
+      notify(delta.id);
+    } catch(ex) {}
+
+    // delete download from browser
+    //browser.browsingData.removeDownloads({ originTypes: "extension" }).catch(onError);
+  }
+}
+
+function getPicUrl(message) {
+  if (message.url.constructor === Array) {
+    return message.url[1];
+  } else {
+    return message.url;
+  }
+}
+
+function getVidUrl(message) {
+  if (message.url.constructor === Array) {
+    return message.url[0];
+  } else {
+    return undefined;
   }
 }
 
 function downloadPic(message) {
-  var vid_url;
-  var pic_url;
-
-  if (message.url.constructor === Array) {
-    vid_url = message.url[0];
-    pic_url = message.url[1];
-  } else {
-    pic_url = message.url;
-  }
+  var vid_url = getVidUrl(message);
+  var pic_url = getPicUrl(message);
 
   var parser = document.createElement('a');
   parser.href = pic_url;
@@ -58,7 +93,7 @@ function downloadPic(message) {
                parser.filename,
     conflictAction: 'overwrite'
   });
-  d_img.then(onStartedDownload, onFailed);
+  d_img.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'picture', artefact_icon: 'image'}), dl_id), onFailed);
 
   var d_vid;
   if (vid_url) {
@@ -73,7 +108,7 @@ function downloadPic(message) {
                  parser.filename,
       conflictAction: 'overwrite'
     });
-    d_vid.then(onStartedDownload, onFailed);
+    d_vid.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'video', artefact_icon: 'file-video'}), dl_id), onFailed);
   }
 
   // Set up post file for download
@@ -95,13 +130,14 @@ function downloadPic(message) {
     filename: a.download,
     conflictAction: 'overwrite'
   });
-  d_post.then(onStartedDownload, onFailed);
+  d_post.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'post data (json)', artefact_icon: 'file-code'}), dl_id), onFailed);
 
   // Set up profile info file for download
   getProfile(message);
 }
 
-function handleMessages(message) {
+function handleMessages(message, sender) {
+  message.sender = sender;
   switch (message.msg) {
     case "store_pic":
       downloadPic(message);
@@ -127,7 +163,7 @@ function notifyTabs(tabs) {
 }
 
 function onError(error) {
-  console.log(`background.js: Error notifying tabs: ${error}`);
+  console.log(`background.js: ${error}`);
 }
 
 // get bio either from content page or from the profile page
@@ -154,7 +190,7 @@ function getProfile(message) {
         f = this.responseText.match(re);
         profile_pic_url_hd = f[1];
       } catch (e) {
-        console.log(`backhround.js: Error finding bio: ${e}`);
+        console.log(`background.js: Error finding bio: ${e}`);
       }
 
       // save profile
@@ -172,7 +208,7 @@ function getProfile(message) {
         filename: ab.download,
         conflictAction: 'overwrite'
       });
-      d_bio.then(onStartedDownload, onFailed);
+      d_bio.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
 
       // save profile pic
       var parser = document.createElement('a');
@@ -185,7 +221,7 @@ function getProfile(message) {
                    parser.filename,
         conflictAction: 'overwrite'
       });
-      d_profile_pic.then(onStartedDownload, onFailed);
+      d_profile_pic.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile picture', artefact_icon: 'id-badge'}), dl_id), onFailed);
     });
     oReq.open("GET", "https://www.instagram.com/" + message.user);
     oReq.send();
@@ -205,6 +241,6 @@ function getProfile(message) {
       filename: ab.download,
       conflictAction: 'overwrite'
     });
-    d_bio.then(onStartedDownload, onFailed);
+    d_bio.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
   }
 }
