@@ -1,32 +1,4 @@
 {
-
-  "manifest_version": 2,
-  "name": "IGDownload",
-  "version": "1.4.1",
-  "default_locale": "en",
-  "description": "Allows you to download IG fotos.",
-
-  "permissions": [
-    "contextMenus",
-    "activeTab",
-    "downloads",
-    "notifications",
-    "storage",
-    "tabs"
-],
-
-  "background": {
-    "scripts": ["background.js"]
-  },
-
-  "content_scripts": [
-    {
-      "matches": ["*://*.instagram.com/*"],
-      "js": ["igcs.js"],
-      "css": ["content.css"]
-    }
-  ],
-
   "applications": {
     "gecko": {
       "id": "ig_download@example.com",
@@ -34,11 +6,42 @@
       "update_url": "https://asf-nc.hopto.org/igwe/updates.json"
     }
   },
-
-  "options_ui": {
-    "page": "options.html",
-    "browser_style": true
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
   },
-
-  "web_accessible_resources": ["floppy-o.png"]
+  "content_scripts": [
+    {
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "igcs.js"
+      ],
+      "matches": [
+        "*://*.instagram.com/*"
+      ]
+    }
+  ],
+  "default_locale": "en",
+  "description": "Allows you to download IG fotos.",
+  "manifest_version": 2,
+  "name": "IGDownload",
+  "options_ui": {
+    "browser_style": true,
+    "page": "options.html"
+  },
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "downloads",
+    "notifications",
+    "storage",
+    "tabs"
+  ],
+  "version": "1.5",
+  "web_accessible_resources": [
+    "floppy-o.png"
+  ]
 }
