@@ -25,9 +25,9 @@
     }
   ],
   "default_locale": "en",
-  "description": "Allows you to download IG fotos.",
+  "description": "Download your favorite fotos and videos from Instagram.",
   "manifest_version": 2,
-  "name": "IGDownload",
+  "name": "IG Downloads",
   "options_ui": {
     "browser_style": true,
     "page": "options.html"
