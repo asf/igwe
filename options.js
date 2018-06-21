@@ -38,8 +38,8 @@ function restoreOptions() {
     document.querySelector("#timestamp_qs").value = result.timestamp_qs || "time";
     document.querySelector("#location_closest").value = result.location_closest || "article";
     document.querySelector("#location_qs").value = result.location_qs || "header div.M30cS a";
-    document.querySelector("#heart_icon_class").value = result.heart_icon_class || "plqBR";
-    document.querySelector("#store_icon_class").value = result.store_icon_class || "CE8hu";
+    document.querySelector("#heart_icon_class").value = result.heart_icon_class || "coreSpriteHeartFull";
+    document.querySelector("#store_icon_class").value = result.store_icon_class || "coreSpriteSaveFull";
     document.querySelector("#bio_class").value = result.bio_class || "-vDIg";
     document.querySelector("#action_bar_qs").value = result.action_bar_qs || ".Slqrh";
     document.querySelector("#write_log").checked = result.write_log || false;

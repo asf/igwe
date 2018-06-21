@@ -201,8 +201,8 @@ function loadOptions(callback_function) {
     timestamp_qs = result.timestamp_qs || "time";
     location_closest = result.location_closest || "article";
     location_qs = result.location_qs || "header div.M30cS a";
-    heart_icon_class = result.heart_icon_class || "plqBR";
-    store_icon_class = result.store_icon_class || "CE8hu";
+    heart_icon_class = result.heart_icon_class || "coreSpriteHeartFull";
+    store_icon_class = result.store_icon_class || "coreSpriteSaveFull";
     bio_class = result.bio_class || "-vDIg";
     action_bar_qs = result.action_bar_qs || ".Slqrh";
     callback_function();
