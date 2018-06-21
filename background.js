@@ -1,9 +1,12 @@
 'use strict';
 
 var dls = {};
+var write_log = false;
 
 browser.runtime.onMessage.addListener(handleMessages);
 browser.downloads.onChanged.addListener(handleChanged);
+
+loadOptions();
 
 function parseDate(input) {
   // 2018-06-12T17:59:54.000Z
@@ -28,7 +31,7 @@ function notify(dl_id) {
 }
 
 function onStartedDownload(message, id) {
-  console.log(`Started downloading for ${message.user}: ${id} with ${message.artefact_icon}`);
+  if (write_log) console.log(`Started downloading for ${message.user}: ${id} with ${message.artefact_icon}`);
 
   // store message based on id
   dls[id] = message;
@@ -48,11 +51,11 @@ function onFailed(error) {
 
 function handleChanged(delta) {
   try {
-    console.log(`background.js: dl_changes ${delta.state.current}, ${delta.bytesReceived}`);
+    if (write_log) console.log(`background.js: dl_changes ${delta.state.current}, ${delta.bytesReceived}`);
   } catch(ex) {}
 
   if (delta.state && delta.state.current === "complete") {
-    console.log(`Download ${delta.id} has completed. ${dls[delta.id].artefact_icon}`);
+    if (write_log) console.log(`background.js: Download ${delta.id} has completed. ${dls[delta.id].artefact_icon}`);
 
     // notify content script
     browser.tabs.sendMessage(dls[delta.id].sender.tab.id, {
@@ -95,7 +98,7 @@ function downloadPic(message) {
   var parser = document.createElement('a');
   parser.href = pic_url;
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-  console.log(`background.js: pic filename: ${message.user + "" + parser.pathname}`);
+  if (write_log) console.log(`background.js: pic filename: ${message.user + "" + parser.pathname}`);
 
   var d_img = browser.downloads.download({
     url: pic_url,
@@ -110,7 +113,7 @@ function downloadPic(message) {
   if (vid_url) {
     parser.href = vid_url;
     parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-    console.log(`background.js: vid filename: ${message.user + "" + parser.pathname}`);
+    if (write_log) console.log(`background.js: vid filename: ${message.user + "" + parser.pathname}`);
 
     d_vid = browser.downloads.download({
       url: vid_url,
@@ -135,7 +138,7 @@ function downloadPic(message) {
                message.user + "/" +
                parser.filename.substring(0, parser.filename.lastIndexOf('.')) + ".json";
 
-  console.log(`filename.txt: ${a.download}`);
+  if (write_log) console.log(`filename.txt: ${a.download}`);
   var d_post = browser.downloads.download({
     url: a.href,
     filename: a.download,
@@ -154,18 +157,19 @@ function handleMessages(message, sender) {
       downloadPic(message);
       break;
     case "updated_config":
+      loadOptions();
       var querying = browser.tabs.query({url: "*://*.instagram.com/*"});
       querying.then(notifyTabs, onError);
       break;
     default:
-      console.log(`background.js: Received unhandled message: ${message}`);
+      if (write_log) console.log(`background.js: Received unhandled message: ${message}`);
   }
 }
 
 // notify tabs about new config
 function notifyTabs(tabs) {
   for (let tab of tabs) {
-    console.log(tab.url);
+    if (write_log) console.log(tab.url);
     browser.tabs.sendMessage(
       tab.id,
       {msg: "reload_config"}
@@ -179,23 +183,23 @@ function onError(error) {
 
 // get bio either from content page or from the profile page
 function getProfile(message) {
-  console.log(`background.js: do we have a bio? >${message.bio}<`);
+  if (write_log) console.log(`background.js: do we have a bio? >${message.bio}<`);
   if (message.bio == '') {
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", function(e) {
-      console.log(`background.js: received profile response (${this.responseText})`);
+      if (write_log) console.log(`background.js: received profile response (${this.responseText})`);
       var profile_pic_url_hd;
 
       try {
         var re = /{"user":{"biography":"([^"]*)/;
         var f = this.responseText.match(re);
         message.bio = f[1];
-        console.log(`background.js: bio (${f[1]})`);
+        if (write_log) console.log(`background.js: bio (${f[1]})`);
 
         re = /"full_name":"([^"]*)/;
         f = this.responseText.match(re);
         message.bio = f[1] + ' - ' + message.bio;
-        console.log(`background.js: full name (${f[1]})`);
+        if (write_log) console.log(`background.js: full name (${f[1]})`);
 
         re = /"profile_pic_url_hd":"([^"]*)/
         f = this.responseText.match(re);
@@ -213,7 +217,7 @@ function getProfile(message) {
                     message.user +
                     `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
 
-      console.log(`filename_profile.txt: ${ab.download}`);
+      if (write_log) console.log(`filename_profile.txt: ${ab.download}`);
       var d_bio = browser.downloads.download({
         url: ab.href,
         filename: ab.download,
@@ -246,7 +250,7 @@ function getProfile(message) {
                   message.user +
                   `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
 
-    console.log(`filename_profile.txt: ${ab.download}`);
+    if (write_log) console.log(`filename_profile.txt: ${ab.download}`);
     var d_bio = browser.downloads.download({
       url: ab.href,
       filename: ab.download,
@@ -254,4 +258,16 @@ function getProfile(message) {
     });
     d_bio.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
   }
+}
+
+// Load config
+function loadOptions() {
+  browser.storage.local.get([
+    "write_log"
+  ]).then(result => {
+    if (write_log) console.log("background.js: loading config");
+    write_log = result.write_log || false;
+  }, error => {
+    console.log(`Error: ${error}`);
+  });
 }

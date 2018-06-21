@@ -18,6 +18,7 @@ var bio_class = '';
 var action_bar_qs = '';
 var observer;
 var iconsAdded = [];
+var write_log = false;
 
 var se = document.createElement('script');
 se.setAttribute('src', 'https://use.fontawesome.com/releases/v5.0.13/js/all.js');
@@ -27,7 +28,7 @@ document.body.appendChild(se);
 
 // Load config when we get injected into the page
 loadOptions(function() {
-  console.log(`igcs.js: initialize`);
+  if (write_log) console.log(`igcs.js: initialize`);
   window.addEventListener("click", notifyExtension);
   addMutationObserver();
   addStoreIcon();
@@ -79,12 +80,12 @@ function addMutationObserver() {
 
   observer = new MutationObserver(callback);
   observer.observe(targetNode, config);
-  console.log(`igcs.js: added observer ${observer}`);
+  if (write_log) console.log(`igcs.js: added observer ${observer}`);
 }
 
 // Handle click on heart to download image
 function notifyExtension(e) {
-  console.log(`igcs.js: click on ${e}`);
+  if (write_log) console.log(`igcs.js: click on ${e}`);
   if (e.target.classList.contains(store_icon_class)
     || e.target.classList.contains(heart_icon_class)
     || e.target.classList.contains('storeimg')) {
@@ -97,16 +98,16 @@ function notifyExtension(e) {
 function show_feedback_in_ui(e) {
   var img_cont;
 
-  console.log(`igcs.js: entered show_feedback_in_ui`);
+  if (write_log) console.log(`igcs.js: entered show_feedback_in_ui (${getDomPath(e.target)})`);
   try {
     img_cont = e.target.closest(pic_url_closest).querySelector(pic_url_qs).parentNode.parentNode;
-  } catch(ex) { console.warn(`igcs.js: could not find image: ${ex}`) }
+  } catch(ex) { console.warn(`igcs.js: could not find image: ${ex} (pic_url_closest: ${pic_url_closest}, pic_url_qs: ${pic_url_qs})`) }
 
 
   if (img_cont === undefined) {
     try {
       img_cont = e.target.closest(vid_url_closest).querySelector(vid_pic_url_qs).parentNode.parentNode;
-      console.log(`igcs.js: show_feedback_in_ui: found video`);
+      if (write_log) console.log(`igcs.js: show_feedback_in_ui: found video`);
     } catch(ex) { console.warn(`igcs.js: could not find video: ${ex}`) }
   }
 
@@ -161,7 +162,7 @@ function collect_info_for_dl(e) {
   } catch (e) { console.warn(`igcs.js: couldn't find location_qs ${e}`); }
 
   sha256(pic_url+vid_url).then(function(digest) {
-    console.log(`igcs.js: hash for current article ${digest}`);
+    if (write_log) console.log(`igcs.js: hash for current article ${digest}`);
 
     try {
       article = e.target.closest(pic_url_closest);
@@ -170,7 +171,7 @@ function collect_info_for_dl(e) {
     digest_attribute.value = digest;
     article.setAttributeNode(digest_attribute);
 
-    console.log(`igcs.js: sending download message`);
+    if (write_log) console.log(`igcs.js: sending download message`);
     browser.runtime.sendMessage({
       "msg": "store_pic",
       "url": pic_url || [vid_url, vid_pic_url],
@@ -188,7 +189,7 @@ function collect_info_for_dl(e) {
 function loadOptions(callback_function) {
 
   function setCurrentChoice(result) {
-    console.log("igcs.js: loading config");
+    if (write_log) console.log("igcs.js: loading config");
     pic_url_closest = result.pic_url_closest || "article";
     pic_url_qs = result.pic_url_qs || "img.FFVAD";
     vid_url_closest = result.vid_url_closest || "article";
@@ -205,6 +206,7 @@ function loadOptions(callback_function) {
     bio_class = result.bio_class || "-vDIg";
     action_bar_qs = result.action_bar_qs || ".Slqrh";
     callback_function();
+    write_log = result.write_log || false;
   }
 
   function onError(error) {
@@ -226,16 +228,17 @@ function loadOptions(callback_function) {
     "heart_icon_class",
     "store_icon_class",
     "bio_class",
-    "action_bar_qs"
+    "action_bar_qs",
+    "write_log"
   ]);
   getting.then(setCurrentChoice, onError);
 }
 
-// Listen to changes in the configuration
+// Listen to messages from the backend
 browser.runtime.onMessage.addListener(request => {
   switch (request.msg) {
     case "reload_config":
-      console.log("igcs.js: config changed");
+      if (write_log) console.log("igcs.js: config changed");
       loadOptions();
       break;
     case "download_started":
@@ -243,12 +246,12 @@ browser.runtime.onMessage.addListener(request => {
       break;
     case "download_completed":
       var icon = document.body.querySelector('article[data-igdl_id="'+request.digest+'"] ul.igcs-notice li[class~="'+request.artefact_icon+'"] svg');
-      console.log(`igcs.js: Download completed for: ${request.artefact_icon}`);
+      if (write_log) console.log(`igcs.js: Download completed for: ${request.artefact_icon}`);
       icon.classList.remove('dl-waiting');
       icon.classList.add('dl-done');
       break;
     default:
-      console.log(`igcs.js: Received unhandled message: ${request}`);
+      if (write_log) console.log(`igcs.js: Received unhandled message: ${request}`);
   }
 });
 
