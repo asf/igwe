@@ -19,7 +19,13 @@ function saveOptions(e) {
     write_log: document.querySelector("#write_log").checked
   }).then(result =>  {
     // Let the backend know that we changed the configuration
-    document.querySelector("#success_bar").style.display = "block";
+    document.querySelector("#success_bar").style.opacity = 1;
+    document.querySelector("#success_bar").style.visibility = "visible";
+    document.querySelector("#success_bar").style.transition = "";
+    setTimeout(function() {
+      document.querySelector("#success_bar").style.opacity = 0;
+      document.querySelector("#success_bar").style.transition = "opacity 2s ease-in";
+    }, 2000);
     browser.runtime.sendMessage({"msg": "updated_config"});
   });
 }
