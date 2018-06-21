@@ -70,6 +70,14 @@ function handleChanged(delta) {
       if (dls[delta.id].artefact_icon == 'image' || dls[delta.id].artefact_icon == 'file-video') { notify(delta.id) }
     } catch(ex) {}
 
+    browser.downloads.erase({
+      id: delta.id
+    }).then(ids => {
+      if (write_log) console.log(`background.js: Erased downloads: ${ids}`);
+    }, error => {
+      console.log(`background.js: Error erasing download: ${error}`);
+    });
+
     // delete download from browser
     //browser.browsingData.removeDownloads({ originTypes: "extension" }).catch(onError);
   }
