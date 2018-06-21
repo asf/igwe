@@ -202,8 +202,8 @@ function loadOptions(callback_function) {
     store_icon_class = result.store_icon_class || "coreSpriteSaveFull";
     bio_class = result.bio_class || "-vDIg";
     action_bar_qs = result.action_bar_qs || ".Slqrh";
-    callback_function();
     write_log = result.write_log || false;
+    if (callback_function != undefined) callback_function();
   }
 
   function onError(error) {
