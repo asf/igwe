@@ -26,7 +26,11 @@ function notify(dl_id) {
     "type": "basic",
     "iconUrl": getPicUrl(mes),
     "title": "Your IG download has completed!",
-    "message": `Successfully downloaded ${mes.user}'s' picture posted on ${parseDate(mes.timestamp).toLocaleString('en-US', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' })}.`
+    "message": `Successfully downloaded ${mes.user}'s picture posted on ${
+      parseDate(mes.timestamp).toLocaleString('en-US', { weekday: 'short',
+                                                         year: 'numeric',
+                                                         month: 'long',
+                                                         day: 'numeric' })}.`
   }).catch(onError);
 }
 
