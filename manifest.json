@@ -25,7 +25,15 @@
     }
   ],
   "default_locale": "en",
-  "description": "Download your favorite fotos and videos from Instagram.",
+  "description": "Download your favorite fotos and videos from Instagram.  Simply like a picture or click on the disk button added by the extension to download an image without liking it.  In addition to the image itself the extension will download the profile pic and the biography of the user as well.",
+  "developer": {
+    "name": "Andreas Stöber-Friedrich",
+    "url": "https://asf-nc.hopto.org/igwe"
+  },
+  "icons": {
+    "256": "ig.png"
+  },
+  "incognito": "spanning",
   "manifest_version": 2,
   "name": "IG Downloads",
   "options_ui": {
