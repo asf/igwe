@@ -82,6 +82,9 @@ function handleChanged(delta) {
       console.log(`background.js: Error erasing download: ${error}`);
     });
 
+    if (write_log) console.log(`background.js: content of DLs: ${Object.keys(dls).length}`);
+    delete dls[delta.id];
+
     // delete download from browser
     //browser.browsingData.removeDownloads({ originTypes: "extension" }).catch(onError);
   }
