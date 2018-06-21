@@ -17,8 +17,8 @@ var store_icon_class = '';
 var bio_class = '';
 var action_bar_qs = '';
 var observer;
-var iconsAdded = [];
 var write_log = false;
+var storeIcon = '';
 
 var se = document.createElement('script');
 se.setAttribute('src', 'https://use.fontawesome.com/releases/v5.0.13/js/all.js');
@@ -35,15 +35,12 @@ loadOptions(function() {
 });
 
 function addStoreIcon() {
-  var x = document.body.querySelectorAll(action_bar_qs);
-  var a;
+  var x = document.body.querySelectorAll(action_bar_qs+':not([data-igsiadded])');
+  storeIcon = storeIconElement();
   for(var i=0; i < x.length; i++ ) {
-    if (a === undefined) a = storeIconElement();
-    if (!iconsAdded.includes(x[i])) {
-      x[i].appendChild(a.cloneNode(true));
-      iconsAdded.push(x[i]);
-      console.log(`igcs.js: adding store icon to ${x[i]}`);
-    }
+    x[i].setAttribute('data-igsiadded', '')
+    x[i].appendChild(storeIcon.cloneNode(true));
+    if (write_log) console.log(`igcs.js: adding store icon to ${x[i]}`);
   }
 }
 
