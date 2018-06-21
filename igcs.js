@@ -264,7 +264,6 @@ function generateIcon(request) {
   icon.setAttribute('title', request.artefact_type);
   icon_div.appendChild(icon);
   return icon_div;
-//  return icon_div.appendChild(icon.cloneNode(true)).cloneNode(true);
 }
 
 function sha256(str) {
