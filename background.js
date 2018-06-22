@@ -196,65 +196,69 @@ function onError(error) {
   console.log(`background.js: ${error}`);
 }
 
+function getProfileFromWeb(message, data) {
+  if (write_log) console.log(`background.js: received profile response (${data.responseText})`);
+  var profile_pic_url_hd;
+
+  try {
+    var re = /{"user":{"biography":"([^"]*)/;
+    var f = data.responseText.match(re);
+    message.bio = f[1];
+    if (write_log) console.log(`background.js: bio (${f[1]})`);
+
+    re = /"full_name":"([^"]*)/;
+    f = data.responseText.match(re);
+    message.bio = f[1] + ' - ' + message.bio;
+    if (write_log) console.log(`background.js: full name (${f[1]})`);
+
+    re = /"profile_pic_url_hd":"([^"]*)/
+    f = data.responseText.match(re);
+    profile_pic_url_hd = f[1];
+  } catch (e) {
+    console.log(`background.js: Error finding bio: ${e}`);
+  }
+
+  // save profile
+  var ab = document.createElement('a');
+  var fileb = new Blob([message.bio],
+                       {type: 'text/plain', charset: 'utf-8'});
+  ab.href = URL.createObjectURL(fileb);
+  ab.download = "ig_downloads/" +
+                message.user +
+                `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
+
+  if (write_log) console.log(`filename_profile.txt: ${ab.download}`);
+  var d_bio = browser.downloads.download({
+    url: ab.href,
+    filename: ab.download,
+    conflictAction: 'overwrite'
+  });
+  d_bio.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
+
+  // save profile pic
+  var parser = document.createElement('a');
+  parser.href = profile_pic_url_hd;
+  parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
+  var d_profile_pic = browser.downloads.download({
+    url: profile_pic_url_hd,
+    filename: "ig_downloads/" +
+               message.user + "/profile_pics/" +
+               parser.filename,
+    conflictAction: 'overwrite'
+  });
+  d_profile_pic.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile picture', artefact_icon: 'id-badge'}), dl_id), onFailed);
+}
+
 // get bio either from content page or from the profile page
 function getProfile(message) {
   if (write_log) console.log(`background.js: do we have a bio? >${message.bio}<`);
   if (message.bio == '') {
-    var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", function(e) {
-      if (write_log) console.log(`background.js: received profile response (${this.responseText})`);
-      var profile_pic_url_hd;
-
-      try {
-        var re = /{"user":{"biography":"([^"]*)/;
-        var f = this.responseText.match(re);
-        message.bio = f[1];
-        if (write_log) console.log(`background.js: bio (${f[1]})`);
-
-        re = /"full_name":"([^"]*)/;
-        f = this.responseText.match(re);
-        message.bio = f[1] + ' - ' + message.bio;
-        if (write_log) console.log(`background.js: full name (${f[1]})`);
-
-        re = /"profile_pic_url_hd":"([^"]*)/
-        f = this.responseText.match(re);
-        profile_pic_url_hd = f[1];
-      } catch (e) {
-        console.log(`background.js: Error finding bio: ${e}`);
-      }
-
-      // save profile
-      var ab = document.createElement('a');
-      var fileb = new Blob([message.bio],
-                           {type: 'text/plain', charset: 'utf-8'});
-      ab.href = URL.createObjectURL(fileb);
-      ab.download = "ig_downloads/" +
-                    message.user +
-                    `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
-
-      if (write_log) console.log(`filename_profile.txt: ${ab.download}`);
-      var d_bio = browser.downloads.download({
-        url: ab.href,
-        filename: ab.download,
-        conflictAction: 'overwrite'
-      });
-      d_bio.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
-
-      // save profile pic
-      var parser = document.createElement('a');
-      parser.href = profile_pic_url_hd;
-      parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-      var d_profile_pic = browser.downloads.download({
-        url: profile_pic_url_hd,
-        filename: "ig_downloads/" +
-                   message.user + "/profile_pics/" +
-                   parser.filename,
-        conflictAction: 'overwrite'
-      });
-      d_profile_pic.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile picture', artefact_icon: 'id-badge'}), dl_id), onFailed);
-    });
-    oReq.open("GET", "https://www.instagram.com/" + message.user);
-    oReq.send();
+    try {
+      var oReq = new XMLHttpRequest();
+      oReq.addEventListener("load", function() { getProfileFromWeb(message, this) } );
+      oReq.open("GET", "https://www.instagram.com/" + message.user);
+      oReq.send();
+    } catch (e) { console.log(`background.js: Couldn't retrieve profile: ${e}`); }
   } else {
     // save profile
     var ab = document.createElement('a');
