@@ -1,31 +1,4 @@
 {
-
-  "manifest_version": 2,
-  "name": "IGDownload",
-  "version": "1.4.1",
-  "default_locale": "en",
-  "description": "Allows you to download IG fotos.",
-
-  "permissions": [
-    "contextMenus",
-    "activeTab",
-    "downloads",
-    "notifications",
-    "storage",
-    "tabs"
-],
-
-  "background": {
-    "scripts": ["background.js"]
-  },
-
-  "content_scripts": [
-    {
-      "matches": ["*://*.instagram.com/*"],
-      "js": ["igcs.js"]
-    }
-  ],
-
   "applications": {
     "gecko": {
       "id": "ig_download@example.com",
@@ -33,11 +6,50 @@
       "update_url": "https://asf-nc.hopto.org/igwe/updates.json"
     }
   },
-
-  "options_ui": {
-    "page": "options.html",
-    "browser_style": true
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
   },
-
-  "web_accessible_resources": ["floppy-o.png"]
+  "content_scripts": [
+    {
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "igcs.js"
+      ],
+      "matches": [
+        "*://*.instagram.com/*"
+      ]
+    }
+  ],
+  "default_locale": "en",
+  "description": "Download your favorite fotos and videos from Instagram.  Simply like a picture or click on the disk button added by the extension to download an image without liking it.  In addition to the image itself the extension will download the profile pic and the biography of the user as well.",
+  "developer": {
+    "name": "Andreas Stöber-Friedrich",
+    "url": "https://asf-nc.hopto.org/igwe"
+  },
+  "icons": {
+    "256": "ig.png"
+  },
+  "incognito": "spanning",
+  "manifest_version": 2,
+  "name": "IG Downloads",
+  "options_ui": {
+    "browser_style": true,
+    "page": "options.html"
+  },
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "downloads",
+    "notifications",
+    "storage",
+    "tabs"
+  ],
+  "version": "1.5.2",
+  "web_accessible_resources": [
+    "floppy-o.png"
+  ]
 }
