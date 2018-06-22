@@ -17,6 +17,10 @@
         {
           "update_link": "https://asf-nc.hopto.org/igwe/igdownload-1.5-fx.xpi",
           "version": "1.5"
+        },
+        {
+          "update_link": "https://asf-nc.hopto.org/igwe/igdownload-1.5.1-fx.xpi",
+          "version": "1.5.1"
         }
       ]
     }

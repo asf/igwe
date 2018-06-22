@@ -48,7 +48,7 @@
     "storage",
     "tabs"
   ],
-  "version": "1.5",
+  "version": "1.5.1",
   "web_accessible_resources": [
     "floppy-o.png"
   ]
