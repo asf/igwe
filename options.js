@@ -15,10 +15,17 @@ function saveOptions(e) {
     heart_icon_class: document.querySelector("#heart_icon_class").value,
     store_icon_class: document.querySelector("#store_icon_class").value,
     bio_class: document.querySelector("#bio_class").value,
-    action_bar_qs: document.querySelector("#action_bar_qs").value
+    action_bar_qs: document.querySelector("#action_bar_qs").value,
+    write_log: document.querySelector("#write_log").checked
   }).then(result =>  {
     // Let the backend know that we changed the configuration
-    document.querySelector("#success_bar").style.display = "block";
+    document.querySelector("#success_bar").style.opacity = 1;
+    document.querySelector("#success_bar").style.visibility = "visible";
+    document.querySelector("#success_bar").style.transition = "";
+    setTimeout(function() {
+      document.querySelector("#success_bar").style.opacity = 0;
+      document.querySelector("#success_bar").style.transition = "opacity 2s ease-in";
+    }, 2000);
     browser.runtime.sendMessage({"msg": "updated_config"});
   });
 }
@@ -37,10 +44,11 @@ function restoreOptions() {
     document.querySelector("#timestamp_qs").value = result.timestamp_qs || "time";
     document.querySelector("#location_closest").value = result.location_closest || "article";
     document.querySelector("#location_qs").value = result.location_qs || "header div.M30cS a";
-    document.querySelector("#heart_icon_class").value = result.heart_icon_class || "plqBR";
-    document.querySelector("#store_icon_class").value = result.store_icon_class || "CE8hu";
+    document.querySelector("#heart_icon_class").value = result.heart_icon_class || "coreSpriteHeartFull";
+    document.querySelector("#store_icon_class").value = result.store_icon_class || "coreSpriteSaveFull";
     document.querySelector("#bio_class").value = result.bio_class || "-vDIg";
     document.querySelector("#action_bar_qs").value = result.action_bar_qs || ".Slqrh";
+    document.querySelector("#write_log").checked = result.write_log || false;
   }
 
   function onError(error) {
@@ -62,7 +70,8 @@ function restoreOptions() {
     "heart_icon_class",
     "store_icon_class",
     "bio_class",
-    "action_bar_qs"
+    "action_bar_qs",
+    "write_log"
   ]);
   getting.then(setCurrentChoice, onError);
 }
