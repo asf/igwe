@@ -196,23 +196,23 @@ function onError(error) {
   console.log(`background.js: ${error}`);
 }
 
-function getProfileFromWeb(message, data) {
-  if (write_log) console.log(`background.js: received profile response (${data.responseText})`);
+function getProfileFromWeb(message, responseText) {
+  if (write_log) console.log(`background.js: received profile response (${responseText})`);
   var profile_pic_url_hd;
 
   try {
     var re = /{"user":{"biography":"([^"]*)/;
-    var f = data.responseText.match(re);
+    var f = responseText.match(re);
     message.bio = f[1];
     if (write_log) console.log(`background.js: bio (${f[1]})`);
 
     re = /"full_name":"([^"]*)/;
-    f = data.responseText.match(re);
+    f = responseText.match(re);
     message.bio = f[1] + ' - ' + message.bio;
     if (write_log) console.log(`background.js: full name (${f[1]})`);
 
     re = /"profile_pic_url_hd":"([^"]*)/
-    f = data.responseText.match(re);
+    f = responseText.match(re);
     profile_pic_url_hd = f[1];
   } catch (e) {
     console.log(`background.js: Error finding bio: ${e}`);
@@ -253,12 +253,22 @@ function getProfileFromWeb(message, data) {
 function getProfile(message) {
   if (write_log) console.log(`background.js: do we have a bio? >${message.bio}<`);
   if (message.bio == '') {
-    try {
-      var oReq = new XMLHttpRequest();
-      oReq.addEventListener("load", function() { getProfileFromWeb(message, this) } );
-      oReq.open("GET", "https://www.instagram.com/" + message.user);
-      oReq.send();
-    } catch (e) { console.log(`background.js: Couldn't retrieve profile: ${e}`); }
+    if (self.fetch) {
+      fetch("https://www.instagram.com/" + message.user, {
+        method: "GET",
+        credentials: 'same-origin'
+      })
+      .then(response => response.text())
+      .catch(error => console.error('Error:', error))
+      .then(response => getProfileFromWeb(message, response));
+    } else {
+      try {
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", function() { getProfileFromWeb(message, this.responseText) } );
+        oReq.open("GET", "https://www.instagram.com/" + message.user);
+        oReq.send();
+      } catch (e) { console.log(`background.js: Couldn't retrieve profile: ${e}`); }
+    }
   } else {
     // save profile
     var ab = document.createElement('a');
