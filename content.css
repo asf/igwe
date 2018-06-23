@@ -3,6 +3,12 @@ ul.igcs-notice {
 	background: white;
 	font-size: 24px;
 	margin-top: 5px;
+	min-height: 24px;
+}
+
+ul.igcs-notice:empty {
+	content: "Waiting for download...";
+	color: grey;
 }
 
 ul.igcs-notice svg {
