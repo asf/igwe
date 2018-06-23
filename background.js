@@ -74,9 +74,11 @@ function handleChanged(delta) {
       if (dls[delta.id].artefact_icon == 'image' || dls[delta.id].artefact_icon == 'file-video') { notify(delta.id) }
     } catch(ex) {}
 
+    // remove completed downloads from browser
     browser.downloads.erase({
       id: delta.id
-    }).then(ids => {
+    })
+    .then(ids => {
       if (write_log) console.log(`background.js: Erased downloads: ${ids}`);
     }, error => {
       console.log(`background.js: Error erasing download: ${error}`);
@@ -141,14 +143,14 @@ function downloadPic(message) {
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
   if (write_log) console.log(`background.js: pic filename: ${message.user + "" + parser.pathname}`);
 
-  var d_img = browser.downloads.download({
+  browser.downloads.download({
     url: pic_url,
     filename: "ig_downloads/" +
                message.user + "/" +
                parser.filename,
     conflictAction: 'overwrite'
-  });
-  d_img.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'picture', artefact_icon: 'image'}), dl_id), onFailed);
+  })
+  .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'picture', artefact_icon: 'image'}), dl_id), onFailed);
 
   var d_vid;
   if (vid_url) {
@@ -156,14 +158,14 @@ function downloadPic(message) {
     parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
     if (write_log) console.log(`background.js: vid filename: ${message.user + "" + parser.pathname}`);
 
-    d_vid = browser.downloads.download({
+    browser.downloads.download({
       url: vid_url,
       filename: "ig_downloads/" +
                  message.user + "/" +
                  parser.filename,
       conflictAction: 'overwrite'
-    });
-    d_vid.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'video', artefact_icon: 'file-video'}), dl_id), onFailed);
+    })
+    .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'video', artefact_icon: 'file-video'}), dl_id), onFailed);
   }
 
   // Set up post file for download
@@ -180,12 +182,12 @@ function downloadPic(message) {
                parser.filename.substring(0, parser.filename.lastIndexOf('.')) + ".json";
 
   if (write_log) console.log(`filename.txt: ${a.download}`);
-  var d_post = browser.downloads.download({
+  browser.downloads.download({
     url: a.href,
     filename: a.download,
     conflictAction: 'overwrite'
-  });
-  d_post.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'post data (json)', artefact_icon: 'file-code'}), dl_id), onFailed);
+  })
+  .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'post data (json)', artefact_icon: 'file-code'}), dl_id), onFailed);
 
   // Set up profile info file for download
   getProfile(message);
@@ -199,8 +201,7 @@ function handleMessages(message, sender) {
       break;
     case "updated_config":
       loadOptions();
-      var querying = browser.tabs.query({url: "*://*.instagram.com/*"});
-      querying.then(notifyTabs, onError);
+      browser.tabs.query({url: "*://*.instagram.com/*"}).then(notifyTabs, onError);
       break;
     default:
       if (write_log) console.log(`background.js: Received unhandled message: ${message}`);
@@ -254,25 +255,25 @@ function getProfileFromWeb(message, responseText) {
                 `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
 
   if (write_log) console.log(`filename_profile.txt: ${ab.download}`);
-  var d_bio = browser.downloads.download({
+  browser.downloads.download({
     url: ab.href,
     filename: ab.download,
     conflictAction: 'overwrite'
-  });
-  d_bio.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
+  })
+  .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
 
   // save profile pic
   var parser = document.createElement('a');
   parser.href = profile_pic_url_hd;
   parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-  var d_profile_pic = browser.downloads.download({
+  browser.downloads.download({
     url: profile_pic_url_hd,
     filename: "ig_downloads/" +
                message.user + "/profile_pics/" +
                parser.filename,
     conflictAction: 'overwrite'
-  });
-  d_profile_pic.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile picture', artefact_icon: 'id-badge'}), dl_id), onFailed);
+  })
+  .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile picture', artefact_icon: 'id-badge'}), dl_id), onFailed);
 }
 
 // get bio either from content page or from the profile page
@@ -306,12 +307,12 @@ function getProfile(message) {
                   `/profile__${new Date().toISOString().split('T')[0]}` + ".txt";
 
     if (write_log) console.log(`filename_profile.txt: ${ab.download}`);
-    var d_bio = browser.downloads.download({
+    browser.downloads.download({
       url: ab.href,
       filename: ab.download,
       conflictAction: 'overwrite'
-    });
-    d_bio.then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
+    })
+    .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'profile', artefact_icon: 'address-card'}), dl_id), onFailed);
   }
 }
 
@@ -319,7 +320,8 @@ function getProfile(message) {
 function loadOptions() {
   browser.storage.local.get([
     "write_log"
-  ]).then(result => {
+  ])
+  .then(result => {
     if (write_log) console.log("background.js: loading config");
     write_log = result.write_log || false;
   }, error => {
