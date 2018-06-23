@@ -82,10 +82,36 @@ function handleChanged(delta) {
       console.log(`background.js: Error erasing download: ${error}`);
     });
 
-    if (write_log) console.log(`background.js: content of DLs: ${Object.keys(dls).length}`);
-    delete dls[delta.id];
+    if (write_log) console.log(`background.js: Content of DLs: ${Object.keys(dls).length}`);
 
-    // delete download from browser
+    // remove message reference from download store
+    dls[delta.id] = undefined;
+
+    // remove stuck downloads
+    if (write_log) console.log(`background.js: Checking for stuck downloads...`);
+    browser.downloads.search({
+      urlRegex: 'cdninstagram\.com',                            // downloads from instagram
+      startedBefore: new Date(new Date().getTime() - 1000*60*5) // started more than 5 minutes ago
+    })
+    .then(downloads => {
+      for (let download of downloads) {
+        console.log(download.id);
+        console.log(download.state);
+        console.log(download.url);
+        browser.downloads.cancel(download.id).then(
+          () => {
+            if (write_log) console.log(`background.js: Cancelled stuck download`);
+          },
+          error => {
+            if (write_log) console.log(`background.js: Error cancelling download: ${error}`);
+          }
+        );
+      }
+    }, error => {
+      console.log(`background.js: Error removing stuck download: ${error}`);
+    });
+
+    // delete download from browser history
     //browser.browsingData.removeDownloads({ originTypes: "extension" }).catch(onError);
   }
 }
