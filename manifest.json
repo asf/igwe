@@ -2,7 +2,7 @@
   "applications": {
     "gecko": {
       "id": "ig_download@example.com",
-      "strict_min_version": "42.0",
+      "strict_min_version": "48.0",
       "update_url": "https://asf-nc.hopto.org/igwe/updates.json"
     }
   },
@@ -48,7 +48,7 @@
     "storage",
     "tabs"
   ],
-  "version": "1.5.2",
+  "version": "1.5.4",
   "web_accessible_resources": [
     "floppy-o.png"
   ]
