@@ -41,6 +41,14 @@
         {
           "update_link": "https://asf-nc.hopto.org/igwe/igdownload-1.6.1-an+fx.xpi",
           "version": "1.6.1"
+        },
+        {
+          "update_link": "https://asf-nc.hopto.org/igwe/igdownload-1.6.2-an+fx.xpi",
+          "version": "1.6.2"
+        },
+        {
+          "update_link": "https://asf-nc.hopto.org/igwe/igdownload-1.6.3-an+fx.xpi",
+          "version": "1.6.3"
         }
       ]
     }

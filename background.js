@@ -130,7 +130,7 @@ function getPicUrl(message) {
 
 function getPicUrls(message) {
   if (message.url.constructor === Array) {
-    return message.url[1];
+    return [message.url[1]];
   } else {
     return message.url.split('|');
   }
