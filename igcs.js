@@ -29,7 +29,7 @@ document.body.appendChild(se);
 // Load config when we get injected into the page
 loadOptions(function() {
   if (write_log) console.log(`igcs.js: initialize`);
-  window.addEventListener("click", notifyExtension, {capture: true});
+  window.addEventListener("click", notifyExtension, {capture: true, passive: true});
   addMutationObserver();
   addStoreIcon();
 });
@@ -96,6 +96,7 @@ function show_feedback_in_ui(e) {
   var img_cont;
 
   if (write_log) console.log(`igcs.js: entered show_feedback_in_ui (${getDomPath(e.target)})`);
+  if (write_log) console.debug("e.target: %o", e.target);
   try {
     img_cont = e.target.closest(pic_url_closest).querySelector(pic_url_qs).parentNode.parentNode;
   } catch(ex) { console.warn(`igcs.js: could not find image: ${ex} (pic_url_closest: ${pic_url_closest}, pic_url_qs: ${pic_url_qs})`) }
@@ -115,7 +116,9 @@ function show_feedback_in_ui(e) {
 
   var notice = document.createElement('ul');
   notice.setAttribute('class', 'fa-ul igcs-notice');
-  img_cont.parentNode.parentNode.appendChild(notice);
+  var notice_el = img_cont.parentNode.parentNode.appendChild(notice);
+  if (write_log) console.debug("notice: %o", notice);
+  if (write_log) console.debug("notice_el: %o", notice_el);
 }
 
 function collect_info_for_dl(e) {
@@ -171,15 +174,15 @@ function collect_info_for_dl(e) {
 
     try {
       article = e.target.closest(pic_url_closest);
-      console.debug("=======> %o", e.target.parentNode)
-      console.debug("=======> %o", article)
+      if (write_log) console.debug("=======> %o", e.target.parentNode)
+      if (write_log) console.debug("=======> %o", article)
     } catch (e) { console.warn(`igcs.js: couldn't find pic_url_closest ${e}`); }
     var digest_attribute = document.createAttribute('data-igdl_id');
     digest_attribute.value = digest;
     if (article != null) article.setAttributeNode(digest_attribute);
 
     if (write_log) console.log(`igcs.js: sending download message`);
-    browser.runtime.sendMessage({
+    var m = {
       "msg": "store_pic",
       "url": pic_url || [vid_url, vid_pic_url],
       "user": username,
@@ -188,7 +191,9 @@ function collect_info_for_dl(e) {
       "timestamp": timestamp,
       "location": location,
       "digest": digest
-    });
+    };
+    if (write_log) console.debug("=======> %o", m);
+    browser.runtime.sendMessage(m);
   });
 }
 
@@ -252,7 +257,9 @@ browser.runtime.onMessage.addListener(request => {
       getNoticeSection(request.digest).appendChild(generateIcon(request));
       break;
     case "download_completed":
-      var icon = document.body.querySelector('article[data-igdl_id="'+request.digest+'"] ul.igcs-notice li[class~="'+request.artefact_icon+'"] svg.id' + request.artefact_id);
+      var icon = document.body.querySelector('article[data-igdl_id="' +
+        request.digest+'"] ul.igcs-notice li[class~="' + request.artefact_icon +
+        '"] svg.id' + request.artefact_id);
       if (write_log) console.log(`igcs.js: Download completed for: ${request.artefact_icon}`);
       icon.classList.remove('dl-waiting');
       icon.classList.add('dl-done');
@@ -270,7 +277,8 @@ function generateIcon(request) {
   var icon_div = document.createElement('li');
   icon_div.setAttribute('class', 'fa-li ' + request.artefact_icon);
   var icon = document.createElement('i');
-  icon.setAttribute('class', 'dl-waiting far fa-fw fa-' + request.artefact_icon + ' id' + request.artefact_id);
+  icon.setAttribute('class', 'dl-waiting far fa-fw fa-' + request.artefact_icon +
+                             ' id' + request.artefact_id);
   icon.setAttribute('title', request.artefact_type);
   icon_div.appendChild(icon);
   return icon_div;
