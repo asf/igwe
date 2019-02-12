@@ -45,7 +45,8 @@ function onStartedDownload(message, id) {
     msg: "download_started",
     digest: message.digest,
     artefact_type: message.artefact_type,
-    artefact_icon: message.artefact_icon
+    artefact_icon: message.artefact_icon,
+    artefact_id: id
   }).catch(onError);
 }
 
@@ -66,7 +67,8 @@ function handleChanged(delta) {
       msg: "download_completed",
       digest: dls[delta.id].digest,
       artefact_type: dls[delta.id].artefact_type,
-      artefact_icon: dls[delta.id].artefact_icon
+      artefact_icon: dls[delta.id].artefact_icon,
+      artefact_id: delta.id
     }).catch(onError);
 
     // show browser notification
@@ -122,7 +124,15 @@ function getPicUrl(message) {
   if (message.url.constructor === Array) {
     return message.url[1];
   } else {
-    return message.url;
+    return message.url.split('|')[0];
+  }
+}
+
+function getPicUrls(message) {
+  if (message.url.constructor === Array) {
+    return message.url[1];
+  } else {
+    return message.url.split('|');
   }
 }
 
@@ -136,21 +146,23 @@ function getVidUrl(message) {
 
 function downloadPic(message) {
   var vid_url = getVidUrl(message);
-  var pic_url = getPicUrl(message);
+  var pic_url = getPicUrls(message);
 
   var parser = document.createElement('a');
-  parser.href = pic_url;
-  parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
-  if (write_log) console.log(`background.js: pic filename: ${message.user + "" + parser.pathname}`);
+  pic_url.forEach(function(el){
+    parser.href = el;
+    parser.filename = parser.pathname.substring(parser.pathname.lastIndexOf('/') + 1);
+    if (write_log) console.log(`background.js: pic filename: ${message.user + "/" + parser.pathname}`);
 
-  browser.downloads.download({
-    url: pic_url,
-    filename: "ig_downloads/" +
-               message.user + "/" +
-               parser.filename,
-    conflictAction: 'overwrite'
-  })
-  .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'picture', artefact_icon: 'image'}), dl_id), onFailed);
+    browser.downloads.download({
+      url: el,
+      filename: "ig_downloads/" +
+                 message.user + "/" +
+                 parser.filename,
+      conflictAction: 'overwrite'
+    })
+    .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'picture', artefact_icon: 'image'}), dl_id), onFailed);
+  });
 
   var d_vid;
   if (vid_url) {
@@ -169,25 +181,29 @@ function downloadPic(message) {
   }
 
   // Set up post file for download
-  var a = document.createElement('a');
-  var obj = new Object();
-  obj.post = message.post;
-  obj.timestamp = message.timestamp;
-  obj.location = message.location;
-  obj.bio = message.bio;
-  var file = new Blob([JSON.stringify(obj)], {type: 'text/json', charset: 'utf-8'});
-  a.href = URL.createObjectURL(file);
-  a.download = "ig_downloads/" +
-               message.user + "/" +
-               parser.filename.substring(0, parser.filename.lastIndexOf('.')) + ".json";
+  try {
+    var a = document.createElement('a');
+    var obj = new Object();
+    obj.post = message.post;
+    obj.timestamp = message.timestamp;
+    obj.location = message.location;
+    obj.bio = message.bio;
+    var file = new Blob([JSON.stringify(obj)], {type: 'text/json', charset: 'utf-8'});
+    a.href = URL.createObjectURL(file);
+    a.download = "ig_downloads/" +
+                 message.user + "/" +
+                 parser.filename.substring(0, parser.filename.lastIndexOf('.')) + ".json";
 
-  if (write_log) console.log(`filename.txt: ${a.download}`);
-  browser.downloads.download({
-    url: a.href,
-    filename: a.download,
-    conflictAction: 'overwrite'
-  })
-  .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'post data (json)', artefact_icon: 'file-code'}), dl_id), onFailed);
+    if (write_log) console.log(`filename.txt: ${a.download}`);
+    browser.downloads.download({
+      url: a.href,
+      filename: a.download,
+      conflictAction: 'overwrite'
+    })
+    .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'post data (json)', artefact_icon: 'file-code'}), dl_id), onFailed);
+  } catch (e) {
+    console.warn(`background.js: couldn't download post ${e}`);
+  }
 
   // Set up profile info file for download
   getProfile(message);

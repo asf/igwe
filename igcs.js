@@ -29,7 +29,7 @@ document.body.appendChild(se);
 // Load config when we get injected into the page
 loadOptions(function() {
   if (write_log) console.log(`igcs.js: initialize`);
-  window.addEventListener("click", notifyExtension);
+  window.addEventListener("click", notifyExtension, {capture: true});
   addMutationObserver();
   addStoreIcon();
 });
@@ -55,7 +55,7 @@ function storeIconElement() {
   var style = document.createAttribute('style');
   cl = document.createAttribute('class');
   src.value = browser.extension.getURL('floppy-o.png');
-  style.value = 'width:24px;height:24px;';
+  style.value = 'width:24px;height:24px;padding: 5px 0px 0px 10px;';
   cl.value = 'storeimg';
   img.setAttributeNode(src);
   img.setAttributeNode(style);
@@ -82,7 +82,7 @@ function addMutationObserver() {
 
 // Handle click on heart to download image
 function notifyExtension(e) {
-  if (write_log) console.log(`igcs.js: click on ${e}`);
+  if (write_log) console.log(`igcs.js: click on ${JSON.stringify(e.target)}`);
   if (e.target.classList.contains(store_icon_class)
     || e.target.classList.contains(heart_icon_class)
     || e.target.classList.contains('storeimg')) {
@@ -140,6 +140,14 @@ function collect_info_for_dl(e) {
 
   try {
     pic_url = e.target.closest(pic_url_closest).querySelector(pic_url_qs).src;
+    console.debug("xxx %o", e.target.closest(pic_url_closest));
+    console.debug("xxx %o", e.target.closest(pic_url_closest).querySelectorAll(pic_url_qs));
+    pic_url = [];
+    e.target.closest(pic_url_closest).querySelectorAll(pic_url_qs).forEach(function (val, i) {
+      pic_url.push(val.src);
+    });
+    pic_url = pic_url.join('|');
+    console.log(pic_url);
   } catch (e) { console.warn(`igcs.js: couldn't find pic_url_qs ${e}`); }
   try {
     vid_url = e.target.closest(vid_url_closest).querySelector(vid_url_qs).src;
@@ -163,10 +171,12 @@ function collect_info_for_dl(e) {
 
     try {
       article = e.target.closest(pic_url_closest);
+      console.debug("=======> %o", e.target.parentNode)
+      console.debug("=======> %o", article)
     } catch (e) { console.warn(`igcs.js: couldn't find pic_url_closest ${e}`); }
     var digest_attribute = document.createAttribute('data-igdl_id');
     digest_attribute.value = digest;
-    article.setAttributeNode(digest_attribute);
+    if (article != null) article.setAttributeNode(digest_attribute);
 
     if (write_log) console.log(`igcs.js: sending download message`);
     browser.runtime.sendMessage({
@@ -198,7 +208,7 @@ function loadOptions(callback_function) {
     timestamp_qs = result.timestamp_qs || "time";
     location_closest = result.location_closest || "article";
     location_qs = result.location_qs || "header div.M30cS a";
-    heart_icon_class = result.heart_icon_class || "coreSpriteHeartFull";
+    heart_icon_class = result.heart_icon_class || "coreSpriteHeartOpen";
     store_icon_class = result.store_icon_class || "coreSpriteSaveFull";
     bio_class = result.bio_class || "-vDIg";
     action_bar_qs = result.action_bar_qs || ".Slqrh";
@@ -242,7 +252,7 @@ browser.runtime.onMessage.addListener(request => {
       getNoticeSection(request.digest).appendChild(generateIcon(request));
       break;
     case "download_completed":
-      var icon = document.body.querySelector('article[data-igdl_id="'+request.digest+'"] ul.igcs-notice li[class~="'+request.artefact_icon+'"] svg');
+      var icon = document.body.querySelector('article[data-igdl_id="'+request.digest+'"] ul.igcs-notice li[class~="'+request.artefact_icon+'"] svg.id' + request.artefact_id);
       if (write_log) console.log(`igcs.js: Download completed for: ${request.artefact_icon}`);
       icon.classList.remove('dl-waiting');
       icon.classList.add('dl-done');
@@ -260,7 +270,7 @@ function generateIcon(request) {
   var icon_div = document.createElement('li');
   icon_div.setAttribute('class', 'fa-li ' + request.artefact_icon);
   var icon = document.createElement('i');
-  icon.setAttribute('class', 'dl-waiting far fa-fw fa-' + request.artefact_icon);
+  icon.setAttribute('class', 'dl-waiting far fa-fw fa-' + request.artefact_icon + ' id' + request.artefact_id);
   icon.setAttribute('title', request.artefact_type);
   icon_div.appendChild(icon);
   return icon_div;
