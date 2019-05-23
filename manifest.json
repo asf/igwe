@@ -3,7 +3,7 @@
     "gecko": {
       "id": "ig_download@example.com",
       "strict_min_version": "48.0",
-      "update_url": "https://asf-nc.hopto.org/igwe/updates.json"
+      "update_url": "https://asf-nc.duckdns.org/igwe/updates.json"
     }
   },
   "background": {
