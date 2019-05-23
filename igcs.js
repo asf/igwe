@@ -208,12 +208,12 @@ function loadOptions(callback_function) {
     vid_url_qs = result.vid_url_qs || "video.tWeCl";
     vid_pic_url_qs = result.vid_pic_url_qs || "img._8jZFn";
     post_closest = result.post_closest || "article > div";
-    post_qs = result.post_qs || "div > ul > li > span";
+    post_qs = result.post_qs || "div.C4VMK > span";
     timestamp_closest = result.timestamp_closest || "article";
     timestamp_qs = result.timestamp_qs || "time";
     location_closest = result.location_closest || "article";
-    location_qs = result.location_qs || "header div.M30cS a";
-    heart_icon_class = result.heart_icon_class || "coreSpriteHeartOpen";
+    location_qs = result.location_qs || "header div.JF9hh a";
+    heart_icon_class = result.heart_icon_class || "glyphsSpriteHeart__outline__24__grey_9";
     store_icon_class = result.store_icon_class || "coreSpriteSaveFull";
     bio_class = result.bio_class || "-vDIg";
     action_bar_qs = result.action_bar_qs || ".Slqrh";

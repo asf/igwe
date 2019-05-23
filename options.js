@@ -39,12 +39,12 @@ function restoreOptions() {
     document.querySelector("#vid_url_qs").value = result.vid_url_qs || "video.tWeCl";
     document.querySelector("#vid_pic_url_qs").value = result.vid_pic_url_qs || "iimg._8jZFn";
     document.querySelector("#post_closest").value = result.post_closest || "article > div";
-    document.querySelector("#post_qs").value = result.post_qs || "div > ul > li > span";
+    document.querySelector("#post_qs").value = result.post_qs || "div.C4VMK > span";
     document.querySelector("#timestamp_closest").value = result.timestamp_closest || "article";
     document.querySelector("#timestamp_qs").value = result.timestamp_qs || "time";
     document.querySelector("#location_closest").value = result.location_closest || "article";
-    document.querySelector("#location_qs").value = result.location_qs || "header div.M30cS a";
-    document.querySelector("#heart_icon_class").value = result.heart_icon_class || "coreSpriteHeartOpen";
+    document.querySelector("#location_qs").value = result.location_qs || "header div.JF9hh a";
+    document.querySelector("#heart_icon_class").value = result.heart_icon_class || "glyphsSpriteHeart__outline__24__grey_9";
     document.querySelector("#store_icon_class").value = result.store_icon_class || "coreSpriteSaveFull";
     document.querySelector("#bio_class").value = result.bio_class || "-vDIg";
     document.querySelector("#action_bar_qs").value = result.action_bar_qs || ".Slqrh";
