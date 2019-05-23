@@ -14,7 +14,8 @@
   "content_scripts": [
     {
       "css": [
-        "content.css"
+        "content.css",
+        "assets/css/all.css"
       ],
       "js": [
         "igcs.js"
