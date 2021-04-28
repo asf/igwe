@@ -20,12 +20,6 @@ var observer;
 var write_log = false;
 var storeIcon = '';
 
-var se = document.createElement('script');
-se.setAttribute('src', 'https://use.fontawesome.com/releases/v5.0.13/js/all.js');
-se.setAttribute('integrity', 'sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe');
-se.setAttribute('crossorigin', 'anonymous');
-document.body.appendChild(se);
-
 // Load config when we get injected into the page
 loadOptions(function() {
   if (write_log) console.log(`igcs.js: initialize`);
@@ -259,7 +253,7 @@ browser.runtime.onMessage.addListener(request => {
     case "download_completed":
       var icon = document.body.querySelector('article[data-igdl_id="' +
         request.digest+'"] ul.igcs-notice li[class~="' + request.artefact_icon +
-        '"] svg.id' + request.artefact_id);
+        '"] i');
       if (write_log) console.log(`igcs.js: Download completed for: ${request.artefact_icon}`);
       icon.classList.remove('dl-waiting');
       icon.classList.add('dl-done');
@@ -277,7 +271,7 @@ function generateIcon(request) {
   var icon_div = document.createElement('li');
   icon_div.setAttribute('class', 'fa-li ' + request.artefact_icon);
   var icon = document.createElement('i');
-  icon.setAttribute('class', 'dl-waiting far fa-fw fa-' + request.artefact_icon +
+  icon.setAttribute('class', 'dl-waiting fas fa-fw fa-' + request.artefact_icon +
                              ' id' + request.artefact_id);
   icon.setAttribute('title', request.artefact_type);
   icon_div.appendChild(icon);

@@ -3,7 +3,7 @@
     "gecko": {
       "id": "ig_download@example.com",
       "strict_min_version": "48.0",
-      "update_url": "https://asf-nc.hopto.org/igwe/updates.json"
+      "update_url": "https://asf-nc.duckdns.org/igwe/updates.json"
     }
   },
   "background": {
@@ -14,7 +14,8 @@
   "content_scripts": [
     {
       "css": [
-        "content.css"
+        "content.css",
+        "assets/css/all.css"
       ],
       "js": [
         "igcs.js"
@@ -50,6 +51,9 @@
   ],
   "version": "1.6.3",
   "web_accessible_resources": [
-    "floppy-o.png"
+    "floppy-o.png",
+    "assets/webfonts/fa-solid-900.woff2",
+    "assets/webfonts/fa-solid-900.woff",
+    "assets/webfonts/fa-solid-900.ttf"
   ]
 }
