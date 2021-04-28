@@ -3,7 +3,7 @@
     "gecko": {
       "id": "ig_download@example.com",
       "strict_min_version": "48.0",
-      "update_url": "https://asf-nc.duckdns.org/igwe/updates.json"
+      "update_url": "https://asf-nc.duckdns.org/sites/igwe/updates.json"
     }
   },
   "background": {
@@ -49,7 +49,7 @@
     "storage",
     "tabs"
   ],
-  "version": "1.6.4",
+  "version": "1.6.5",
   "web_accessible_resources": [
     "floppy-o.png",
     "assets/webfonts/fa-solid-900.woff2",
