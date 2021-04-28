@@ -253,7 +253,7 @@ browser.runtime.onMessage.addListener(request => {
     case "download_completed":
       var icon = document.body.querySelector('article[data-igdl_id="' +
         request.digest+'"] ul.igcs-notice li[class~="' + request.artefact_icon +
-        '"] svg.id' + request.artefact_id);
+        '"] i');
       if (write_log) console.log(`igcs.js: Download completed for: ${request.artefact_icon}`);
       icon.classList.remove('dl-waiting');
       icon.classList.add('dl-done');

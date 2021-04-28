@@ -51,6 +51,9 @@
   ],
   "version": "1.6.3",
   "web_accessible_resources": [
-    "floppy-o.png"
+    "floppy-o.png",
+    "assets/webfonts/fa-solid-900.woff2",
+    "assets/webfonts/fa-solid-900.woff",
+    "assets/webfonts/fa-solid-900.ttf"
   ]
 }
