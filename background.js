@@ -56,7 +56,7 @@ function onFailed(error) {
 
 function handleChanged(delta) {
   try {
-    if (write_log) console.log(`background.js: dl_changes ${delta.state.current}, ${delta.bytesReceived}`);
+    if (write_log) console.log(`background.js: dl_changes ${delta.id}, ${delta.state.current}, ${delta.bytesReceived}, ${delta.error.current}`);
   } catch(ex) {}
 
   if (delta.state && delta.state.current === "complete") {
@@ -102,6 +102,8 @@ function handleChanged(delta) {
         console.log(download.id);
         console.log(download.state);
         console.log(download.url);
+        console.log(download.error);
+        console.log(download.filename);
         browser.downloads.cancel(download.id).then(
           () => {
             if (write_log) console.log(`background.js: Cancelled stuck download`);
@@ -159,7 +161,12 @@ function downloadPic(message) {
       filename: "ig_downloads/" +
                  message.user + "/" +
                  parser.filename,
-      conflictAction: 'overwrite'
+      conflictAction: 'overwrite',
+      allowHttpErrors: true,
+      headers: [
+        { name: "Accept", value: "image/webp,*/*" },
+        { name: "Referer", value: "https://www.instagram.com/" }
+      ]
     })
     .then(dl_id => onStartedDownload(Object.assign({}, message, {artefact_type: 'picture', artefact_icon: 'image'}), dl_id), onFailed);
   });
